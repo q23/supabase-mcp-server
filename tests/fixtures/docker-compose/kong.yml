@@ -1,0 +1,35 @@
+_format_version: "2.1"
+
+services:
+  - name: supabase-api
+    url: http://rest:3000
+    routes:
+      - name: rest-route
+        paths:
+          - /rest/v1/
+        strip_path: true
+    plugins:
+      - name: cors
+      - name: key-auth
+        config:
+          hide_credentials: true
+
+  - name: supabase-auth
+    url: http://auth:9999
+    routes:
+      - name: auth-route
+        paths:
+          - /auth/v1/
+        strip_path: true
+    plugins:
+      - name: cors
+
+  - name: supabase-storage
+    url: http://storage:5000
+    routes:
+      - name: storage-route
+        paths:
+          - /storage/v1/
+        strip_path: true
+    plugins:
+      - name: cors

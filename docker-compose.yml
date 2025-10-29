@@ -1,0 +1,125 @@
+version: '3.8'
+
+# Docker Compose for Supabase MCP Server integration tests
+# Provides local Supabase instance for testing
+
+services:
+  # PostgreSQL database
+  postgres:
+    image: supabase/postgres:15.1.0.117
+    container_name: supabase-mcp-postgres
+    ports:
+      - "5432:5432"
+      - "6543:6543"  # PgBouncer pooler port
+    environment:
+      POSTGRES_PASSWORD: your-super-secret-and-long-postgres-password
+      POSTGRES_DB: postgres
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Kong API Gateway
+  kong:
+    image: kong:2.8.1
+    container_name: supabase-mcp-kong
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "8000:8000"  # Kong HTTP
+      - "8443:8443"  # Kong HTTPS
+    environment:
+      KONG_DATABASE: "off"
+      KONG_DECLARATIVE_CONFIG: /var/lib/kong/kong.yml
+      KONG_DNS_ORDER: LAST,A,CNAME
+      KONG_PLUGINS: request-transformer,cors,key-auth,acl,basic-auth
+    volumes:
+      - ./tests/fixtures/docker-compose/kong.yml:/var/lib/kong/kong.yml:ro
+
+  # Supabase Auth (GoTrue)
+  auth:
+    image: supabase/gotrue:v2.99.0
+    container_name: supabase-mcp-auth
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "9999:9999"
+    environment:
+      GOTRUE_API_HOST: 0.0.0.0
+      GOTRUE_API_PORT: 9999
+      API_EXTERNAL_URL: http://localhost:8000
+      GOTRUE_DB_DRIVER: postgres
+      GOTRUE_DB_DATABASE_URL: postgres://postgres:your-super-secret-and-long-postgres-password@postgres:5432/postgres?search_path=auth
+      GOTRUE_SITE_URL: http://localhost:3000
+      GOTRUE_URI_ALLOW_LIST: "*"
+      GOTRUE_DISABLE_SIGNUP: "false"
+      GOTRUE_JWT_ADMIN_ROLES: service_role
+      GOTRUE_JWT_AUD: authenticated
+      GOTRUE_JWT_DEFAULT_GROUP_NAME: authenticated
+      GOTRUE_JWT_EXP: 3600
+      GOTRUE_JWT_SECRET: your-super-secret-jwt-token-with-at-least-32-characters-long
+      GOTRUE_EXTERNAL_EMAIL_ENABLED: "true"
+      GOTRUE_MAILER_AUTOCONFIRM: "true"
+
+  # Supabase Studio
+  studio:
+    image: supabase/studio:20231123-64a766c
+    container_name: supabase-mcp-studio
+    depends_on:
+      - postgres
+    ports:
+      - "3000:3000"
+    environment:
+      STUDIO_PG_META_URL: http://meta:8080
+      POSTGRES_PASSWORD: your-super-secret-and-long-postgres-password
+      DEFAULT_ORGANIZATION_NAME: "Supabase MCP Test"
+      DEFAULT_PROJECT_NAME: "Test Project"
+      SUPABASE_URL: http://localhost:8000
+      SUPABASE_PUBLIC_URL: http://localhost:8000
+      SUPABASE_ANON_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJvbGUiOiJhbm9uIiwiaWF0IjoxNjc1NDAwNDAwLCJleHAiOjE5OTEwNDY0MDB9.Bs24fDdJQk4ahM7kP9aRoFdEvfEVvhfmEVrWgKMV1yY
+
+  # PostgREST
+  rest:
+    image: postgrest/postgrest:v11.2.2
+    container_name: supabase-mcp-rest
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "3001:3000"
+    environment:
+      PGRST_DB_URI: postgres://postgres:your-super-secret-and-long-postgres-password@postgres:5432/postgres
+      PGRST_DB_SCHEMAS: public,storage,graphql_public
+      PGRST_DB_ANON_ROLE: anon
+      PGRST_JWT_SECRET: your-super-secret-jwt-token-with-at-least-32-characters-long
+      PGRST_DB_USE_LEGACY_GUCS: "false"
+
+  # Supabase Meta (for Studio)
+  meta:
+    image: supabase/postgres-meta:v0.68.0
+    container_name: supabase-mcp-meta
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "8080:8080"
+    environment:
+      PG_META_PORT: 8080
+      PG_META_DB_HOST: postgres
+      PG_META_DB_PORT: 5432
+      PG_META_DB_NAME: postgres
+      PG_META_DB_USER: postgres
+      PG_META_DB_PASSWORD: your-super-secret-and-long-postgres-password
+
+volumes:
+  postgres-data:
+    driver: local
+
+networks:
+  default:
+    name: supabase-mcp-network
