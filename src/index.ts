@@ -122,9 +122,9 @@ class SupabaseMCPServer {
                 type: "text",
                 text: `✅ ${name} tool is ready!\n\n` +
                   `Dokploy Configuration:\n` +
-                  `- API URL: ${process.env.DOKPLOY_API_URL || 'Not configured'}\n` +
-                  `- Instance: ${process.env.DOKPLOY_INSTANCE_NAME || 'Not configured'}\n` +
-                  `- API Key: ${process.env.DOKPLOY_API_KEY ? 'Configured ✅' : 'Missing ❌'}\n\n` +
+                  `- API URL: ${process.env["DOKPLOY_API_URL"] || 'Not configured'}\n` +
+                  `- Instance: ${process.env["DOKPLOY_INSTANCE_NAME"] || 'Not configured'}\n` +
+                  `- API Key: ${process.env["DOKPLOY_API_KEY"] ? 'Configured ✅' : 'Missing ❌'}\n\n` +
                   `Arguments received:\n${JSON.stringify(args, null, 2)}\n\n` +
                   `To enable full functionality:\n` +
                   `1. Fix TypeScript errors: Run through codebase\n` +
@@ -184,9 +184,9 @@ class SupabaseMCPServer {
    */
   private async handleHealthCheck() {
     const envCheck = {
-      supabaseConfigured: !!(process.env.SUPABASE_URL && process.env.SUPABASE_ANON_KEY),
-      postgresConfigured: !!(process.env.POSTGRES_HOST && process.env.POSTGRES_PASSWORD),
-      dokployConfigured: !!(process.env.DOKPLOY_API_URL && process.env.DOKPLOY_API_KEY),
+      supabaseConfigured: !!(process.env["SUPABASE_URL"] && process.env["SUPABASE_ANON_KEY"]),
+      postgresConfigured: !!(process.env["POSTGRES_HOST"] && process.env["POSTGRES_PASSWORD"]),
+      dokployConfigured: !!(process.env["DOKPLOY_API_URL"] && process.env["DOKPLOY_API_KEY"]),
     };
 
     return {
@@ -198,7 +198,7 @@ class SupabaseMCPServer {
               status: "healthy",
               server: SERVER_NAME,
               version: SERVER_VERSION,
-              environment: process.env.NODE_ENV || "development",
+              environment: process.env["NODE_ENV"] || "development",
               configuration: envCheck,
               timestamp: new Date().toISOString(),
             },
@@ -219,7 +219,7 @@ class SupabaseMCPServer {
 
     // Log to stderr (stdout is reserved for MCP protocol)
     console.error(`${SERVER_NAME} v${SERVER_VERSION} started`);
-    console.error(`Environment: ${process.env.NODE_ENV || "development"}`);
+    console.error(`Environment: ${process.env["NODE_ENV"] || "development"}`);
   }
 }
 

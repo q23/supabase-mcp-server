@@ -144,11 +144,11 @@ export class ConnectionBuilder {
    * Build connection from environment variables
    */
   static fromEnvironment(): ConnectionConfig {
-    const host = process.env.POSTGRES_HOST;
-    const port = process.env.POSTGRES_PORT;
+    const host = process.env["POSTGRES_HOST"];
+    const port = process.env["POSTGRES_PORT"];
     const database = process.env.POSTGRES_DATABASE;
     const user = process.env.POSTGRES_USER;
-    const password = process.env.POSTGRES_PASSWORD;
+    const password = process.env["POSTGRES_PASSWORD"];
 
     if (!host || !password) {
       throw new ConnectionError(
@@ -186,7 +186,7 @@ export class ConnectionBuilder {
    * Create pooled connection config
    */
   static toPooled(config: ConnectionConfig): ConnectionConfig {
-    const pooledPort = parseInt(process.env.POSTGRES_POOLED_PORT || "6543");
+    const pooledPort = parseInt(process.env["POSTGRES_POOLED_PORT"] || "6543");
 
     return {
       ...config,
@@ -252,7 +252,7 @@ export class ConnectionBuilder {
     // 3. Supabase-specific (SUPABASE_URL + password)
 
     // Check for full connection string
-    const connectionString = process.env.DATABASE_URL || process.env.CONNECTION_STRING;
+    const connectionString = process.env["DATABASE_URL"] || process.env["CONNECTION_STRING"];
     if (connectionString) {
       logger.info("Using connection string from DATABASE_URL");
       return this.parseConnectionString(connectionString);
@@ -260,13 +260,13 @@ export class ConnectionBuilder {
 
     // Check for Supabase URL
     const supabaseUrl = process.env.SUPABASE_URL;
-    if (supabaseUrl && process.env.POSTGRES_PASSWORD) {
+    if (supabaseUrl && process.env["POSTGRES_PASSWORD"]) {
       logger.info("Using Supabase URL connection");
       // Extract project ref from URL (e.g., https://abc123.supabase.co)
       const match = supabaseUrl.match(/https?:\/\/([^.]+)\.supabase\.co/);
       if (match) {
         const projectRef = match[1];
-        const { direct } = this.parseSupabaseConnection(projectRef, process.env.POSTGRES_PASSWORD);
+        const { direct } = this.parseSupabaseConnection(projectRef, process.env["POSTGRES_PASSWORD"]);
         return direct;
       }
     }

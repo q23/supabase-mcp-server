@@ -4,7 +4,7 @@
  */
 
 import type { PostgresConnectionPool } from "../postgres/connection-pool.js";
-import { BufferManager } from "../memory/buffer-manager.js";
+// import { BufferManager } from "../memory/buffer-manager.js";
 import { logger } from "../utils/logger.js";
 import type { ProgressUpdate } from "../../types/mcp.js";
 

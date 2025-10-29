@@ -3,7 +3,7 @@
  * Uploads/downloads backups to S3-compatible storage
  */
 
-import axios from "axios";
+// import axios from "axios";
 import { logger } from "../utils/logger.js";
 
 export interface S3Config {

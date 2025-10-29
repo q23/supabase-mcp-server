@@ -5,7 +5,7 @@
 
 import type { PostgresConnectionPool } from "../postgres/connection-pool.js";
 import type { MigrationRecord } from "../../types/supabase.js";
-import { Encryption } from "../utils/encryption.js";
+// import { Encryption } from "../utils/encryption.js";
 
 export class MigrationVersionTracker {
   private pool: PostgresConnectionPool;

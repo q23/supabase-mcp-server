@@ -141,20 +141,20 @@ export function buildConfig(): MCPServerConfig {
         defaultConfig.backup!.retentionDays,
         parseInteger
       ),
-      encryptionKey: process.env.BACKUP_ENCRYPTION_KEY,
-      s3: process.env.S3_ENDPOINT
+      encryptionKey: process.env["BACKUP_ENCRYPTION_KEY"],
+      s3: process.env["S3_ENDPOINT"]
         ? {
-            endpoint: process.env.S3_ENDPOINT,
-            bucket: process.env.S3_BUCKET!,
-            accessKeyId: process.env.S3_ACCESS_KEY_ID!,
-            secretAccessKey: process.env.S3_SECRET_ACCESS_KEY!,
-            region: process.env.S3_REGION || "us-east-1",
+            endpoint: process.env["S3_ENDPOINT"],
+            bucket: process.env["S3_BUCKET"]!,
+            accessKeyId: process.env["S3_ACCESS_KEY_ID"]!,
+            secretAccessKey: process.env["S3_SECRET_ACCESS_KEY"]!,
+            region: process.env["S3_REGION"] || "us-east-1",
           }
         : undefined,
     },
 
     monitoring: {
-      webhookUrl: process.env.ALERT_WEBHOOK_URL,
+      webhookUrl: process.env["ALERT_WEBHOOK_URL"],
       connectionPoolWarningThreshold: getEnvOrDefault(
         "CONNECTION_POOL_WARNING_THRESHOLD",
         defaultConfig.monitoring!.connectionPoolWarningThreshold,

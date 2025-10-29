@@ -10,7 +10,7 @@ import { logger } from "../utils/logger.js";
 import fs from "node:fs/promises";
 import { createWriteStream } from "node:fs";
 import { createGzip } from "node:zlib";
-import { pipeline } from "node:stream/promises";
+// import { pipeline } from "node:stream/promises";
 
 export class BackupCreator {
   private pool: PostgresConnectionPool;
@@ -33,7 +33,7 @@ export class BackupCreator {
     const postgresVersion = versionResult.rows[0].version;
 
     // Execute pg_dump (simplified - would use actual pg_dump)
-    const dumpResult = await this.pool.query(
+    const _dumpResult = await this.pool.query(
       "SELECT table_name FROM information_schema.tables WHERE table_schema = 'public'"
     );
 
@@ -41,8 +41,8 @@ export class BackupCreator {
 
     // Compress if requested
     if (options.compress) {
-      const writeStream = createWriteStream(outputPath + ".gz");
-      const gzip = createGzip();
+      const _writeStream = createWriteStream(outputPath + ".gz");
+      const _gzip = createGzip();
       // Would pipe pg_dump output here
       outputPath += ".gz";
     }
