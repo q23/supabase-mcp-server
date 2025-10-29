@@ -1,54 +1,32 @@
-# Real Dokploy Docker Environment
-# Ubuntu 22.04 + Complete Dokploy Installation
+# Dokploy-like Deployment System
+# Node.js + Express + Docker Compose for real deployments
 
-FROM ubuntu:22.04
+FROM node:20-alpine
 
-# Avoid interactive prompts
-ENV DEBIAN_FRONTEND=noninteractive
-
-# Install prerequisites
-RUN apt-get update && apt-get install -y \
+# Install Docker CLI and Docker Compose
+RUN apk add --no-cache \
+    docker-cli \
+    docker-cli-compose \
     curl \
-    wget \
-    git \
-    ca-certificates \
-    gnupg \
-    lsb-release \
-    sudo \
-    && rm -rf /var/lib/apt/lists/*
+    bash
 
-# Install Docker CLI (for Dokploy to manage containers via mounted socket)
-RUN curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg && \
-    echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null && \
-    apt-get update && \
-    apt-get install -y docker-ce-cli docker-compose-plugin && \
-    rm -rf /var/lib/apt/lists/*
+WORKDIR /app
 
-# Create dokploy user
-RUN useradd -m -s /bin/bash dokploy && \
-    usermod -aG sudo dokploy && \
-    echo "dokploy ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
+# Copy deployment manager
+COPY deployment-manager/ ./
 
-# Copy setup script
-COPY setup.sh /tmp/setup.sh
-RUN chmod +x /tmp/setup.sh
-
-# Switch to dokploy user
-USER dokploy
-WORKDIR /home/dokploy
-
-# Run Dokploy installation
-RUN /tmp/setup.sh
+# Install dependencies
+RUN npm install
 
 # Expose ports
 EXPOSE 3000 3001
 
-# Volume for Dokploy data
-VOLUME ["/home/dokploy"]
+# Volume for deployment data
+VOLUME ["/app/deployments"]
 
 # Healthcheck
-HEALTHCHECK --interval=30s --timeout=10s --start-period=120s --retries=3 \
-    CMD curl -f http://localhost:3000 || exit 1
+HEALTHCHECK --interval=10s --timeout=5s --start-period=30s --retries=3 \
+    CMD curl -f http://localhost:3000/health || exit 1
 
-# Start Dokploy
-CMD ["bash", "-c", "dokploy start || tail -f /dev/null"]
+# Start deployment manager
+CMD ["npm", "start"]
