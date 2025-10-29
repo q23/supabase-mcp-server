@@ -100,7 +100,7 @@ export class DokployAPIClient {
       baseURL: config.apiUrl,
       timeout: 30000,
       headers: {
-        "x-api-key": config.apiKey,
+        "Authorization": `Bearer ${config.apiKey}`,
         "Content-Type": "application/json",
       },
     });
@@ -160,17 +160,12 @@ export class DokployAPIClient {
           domain: config.domain,
         });
 
-        const response = await this.request<DokployApplication>("POST", "/api/application", {
+        const response = await this.request<DokployApplication>("POST", "/api/application.create", {
           name: config.projectName,
-          projectId: config.projectId,
-          appType: "compose",
-          source: {
-            type: "docker",
-            image: "supabase/supabase",
-            tag: "latest",
-          },
-          env: config.env,
-          domain: config.domain,
+          appName: config.projectName,
+          description: "Supabase instance deployed via MCP",
+          projectId: config.projectId || "default",
+          serverId: null,
         });
 
         logger.info("Dokploy application created", {
