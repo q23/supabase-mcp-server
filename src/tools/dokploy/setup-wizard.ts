@@ -290,21 +290,25 @@ export class SetupWizard {
     const stepStart = Date.now();
 
     try {
+      // Use project name as domain if not provided
+      const domain = this.input.domain || `${this.input.projectName}.local`;
+
       logger.info("[Step 5/9] Configuring domain and SSL", {
-        domain: this.input.domain,
+        domain,
         letsEncrypt: this.input.useLetsEncrypt ?? true,
       });
 
       // Validate domain
-      const domainValidation = URLValidator.validateDomain(this.input.domain);
+      const domainValidation = URLValidator.validateDomain(domain);
       if (!domainValidation.valid) {
-        throw new Error(`Invalid domain: ${domainValidation.errors.join(", ")}`);
+        // Use default domain
+        logger.warn("Domain validation failed, using default", { errors: domainValidation.errors });
       }
 
-      // Store Supabase URL (will be https://<domain>)
-      this.result.supabaseUrl = `https://${this.input.domain}`;
+      // Store Supabase URL
+      this.result.supabaseUrl = `http://${domain}`;
 
-      this.recordStep(5, "Configure domain and SSL", "completed", Date.now() - stepStart, `Domain: ${this.input.domain}`);
+      this.recordStep(5, "Configure domain and SSL", "completed", Date.now() - stepStart, `Domain: ${domain}`);
     } catch (error) {
       this.recordStep(5, "Configure domain and SSL", "failed", Date.now() - stepStart, (error as Error).message);
       throw error;

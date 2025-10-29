@@ -178,6 +178,11 @@ export class URLValidator {
   } {
     const errors: string[] = [];
 
+    // Check if domain exists
+    if (!domain) {
+      return { valid: false, errors: ["Domain is required"] };
+    }
+
     // Remove protocol if present
     const cleanDomain = domain.replace(/^https?:\/\//, "").replace(/\/.*$/, "");
 
