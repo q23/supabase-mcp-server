@@ -116,8 +116,31 @@ services:
       PG_META_DB_USER: postgres
       PG_META_DB_PASSWORD: your-super-secret-and-long-postgres-password
 
+  # Real Dokploy (for E2E testing)
+  dokploy:
+    build:
+      context: ./docker/dokploy
+      dockerfile: Dockerfile
+    container_name: dokploy-dev
+    ports:
+      - "3000:3000"
+      - "3001:3001"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - dokploy-data:/home/dokploy
+    networks:
+      - default
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000"]
+      interval: 30s
+      timeout: 10s
+      start_period: 120s
+      retries: 3
+
 volumes:
   postgres-data:
+    driver: local
+  dokploy-data:
     driver: local
 
 networks:
