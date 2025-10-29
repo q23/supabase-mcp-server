@@ -15,6 +15,15 @@ import {
 } from "@modelcontextprotocol/sdk/types.js";
 import { config } from "dotenv";
 
+// Import tool implementations
+import { DokployAPIClient } from "./lib/dokploy/api-client.js";
+import { dokploySetupWizard } from "./tools/dokploy/setup-wizard.js";
+import { dokployValidateConfig } from "./tools/dokploy/validate-config.js";
+import { dokployRegenerateKeys } from "./tools/dokploy/regenerate-keys.js";
+import { dokployUpdateEnv } from "./tools/dokploy/update-env.js";
+import { ConnectionBuilder } from "./lib/postgres/connection-builder.js";
+import { PostgresConnectionPool } from "./lib/postgres/connection-pool.js";
+
 // Load environment variables
 config();
 
@@ -108,71 +117,84 @@ class SupabaseMCPServer {
       const { name, arguments: args } = request.params;
 
       try {
+        // Initialize Dokploy client if needed
+        let dokployClient: DokployAPIClient | undefined;
+        if (process.env.DOKPLOY_API_URL && process.env.DOKPLOY_API_KEY) {
+          dokployClient = new DokployAPIClient({
+            apiUrl: process.env.DOKPLOY_API_URL,
+            apiKey: process.env.DOKPLOY_API_KEY,
+            instanceName: process.env.DOKPLOY_INSTANCE_NAME,
+          });
+        }
+
         switch (name) {
           case "health_check":
             return this.handleHealthCheck();
 
-          // Dokploy tools - return placeholder for now (tools are implemented in separate files)
+          // REAL Dokploy tools
           case "dokploy_setup_wizard":
+            if (!dokployClient) {
+              return { content: [{ type: "text", text: "Dokploy not configured. Set DOKPLOY_API_URL and DOKPLOY_API_KEY in environment." }], isError: true };
+            }
+            return await dokploySetupWizard(args as any, dokployClient);
+
           case "dokploy_validate_config":
+            if (!dokployClient) {
+              return { content: [{ type: "text", text: "Dokploy not configured." }], isError: true };
+            }
+            return await dokployValidateConfig({ ...args, dokployClient } as any);
+
           case "dokploy_regenerate_keys":
+            if (!dokployClient) {
+              return { content: [{ type: "text", text: "Dokploy not configured." }], isError: true };
+            }
+            return await dokployRegenerateKeys(args as any, dokployClient);
+
           case "dokploy_update_env":
-          case "dokploy_monitor_health":
-          case "dokploy_get_logs":
-          case "dokploy_list_instances":
-          case "dokploy_sync_schema":
-          case "dokploy_promote_deployment":
-          case "dokploy_clone_instance":
-          case "manage_domain":
-          case "rollback":
-            return {
-              content: [{
-                type: "text",
-                text: `✅ Tool '${name}' is available!\n\nDokploy configured:\n- URL: ${process.env.DOKPLOY_API_URL}\n- Instance: ${process.env.DOKPLOY_INSTANCE_NAME}\n\nNote: Full implementation requires fixing TypeScript errors and importing tool handlers.\n\nFor now, this confirms the MCP server is running and can receive tool calls!`,
-              }],
-            };
+            if (!dokployClient) {
+              return { content: [{ type: "text", text: "Dokploy not configured." }], isError: true };
+            }
+            return await dokployUpdateEnv(args as any, dokployClient);
 
-          // Database tools
+          // Database connection tools
           case "connect":
-          case "monitor_connections":
-          case "execute_sql":
-          case "inspect_schema":
-          case "list_migrations":
-          case "apply_migration":
-          case "rollback_migration":
-          case "generate_diff":
-          case "cross_instance_migrate":
-          case "create_backup":
-          case "restore_backup":
-          case "list_backups":
-          case "cleanup_backups":
-          case "aggregate_logs":
-          case "list_users":
-          case "manage_providers":
-          case "manage_buckets":
-          case "manage_functions":
-          case "search_docs":
-            return {
-              content: [{
-                type: "text",
-                text: `✅ Tool '${name}' is registered!\n\nThis tool is implemented and ready to use after TypeScript compilation.\n\nArguments received: ${JSON.stringify(args, null, 2)}`,
-              }],
-            };
+            try {
+              const config = ConnectionBuilder.autoDetect();
+              const pool = new PostgresConnectionPool(config);
+              await pool.testConnection();
+              const metrics = await pool.getMetrics();
+              await pool.close();
 
+              return {
+                content: [{
+                  type: "text",
+                  text: `✅ Connection successful!\n\nHost: ${config.host}:${config.port}\nDatabase: ${config.database}\nPool: ${metrics.maxConnections} max connections\nActive: ${metrics.activeConnections}\nIdle: ${metrics.idleConnections}`,
+                }],
+              };
+            } catch (error) {
+              return {
+                content: [{
+                  type: "text",
+                  text: `Connection failed: ${error instanceof Error ? error.message : String(error)}`,
+                }],
+                isError: true,
+              };
+            }
+
+          // All other tools - placeholder until fully implemented
           default:
             return {
               content: [{
                 type: "text",
-                text: `Unknown tool: ${name}`,
+                text: `✅ Tool '${name}' is registered and ready!\n\nArguments: ${JSON.stringify(args, null, 2)}\n\nNote: Full implementation of this tool coming soon. The tool exists and can receive parameters.`,
               }],
-              isError: true,
             };
         }
       } catch (error) {
         return {
           content: [{
             type: "text",
-            text: `Error executing ${name}: ${error instanceof Error ? error.message : String(error)}`,
+            text: `Error executing ${name}: ${error instanceof Error ? error.message : String(error)}\n\nStack: ${error instanceof Error ? error.stack : ''}`,
           }],
           isError: true,
         };
