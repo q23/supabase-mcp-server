@@ -29,10 +29,45 @@ class SupabaseMCPServer {
   private setupHandlers(): void {
     this.server.setRequestHandler(ListToolsRequestSchema, async () => ({
       tools: [
-        { name: "health_check", description: "Check server health", inputSchema: { type: "object", properties: {} } },
-        { name: "dokploy_setup_wizard", description: "Deploy Supabase to Dokploy", inputSchema: { type: "object", properties: {} } },
-        { name: "dokploy_validate_config", description: "Detect broken configs", inputSchema: { type: "object", properties: {} } },
-        { name: "dokploy_regenerate_keys", description: "Fix broken JWT keys", inputSchema: { type: "object", properties: {} } },
+        {
+          name: "health_check",
+          description: "Check server health",
+          inputSchema: { type: "object", properties: {} }
+        },
+        {
+          name: "dokploy_setup_wizard",
+          description: "Deploy Supabase to Dokploy",
+          inputSchema: {
+            type: "object",
+            properties: {
+              projectName: { type: "string", description: "Project name" },
+              domain: { type: "string", description: "Domain (optional)" }
+            },
+            required: ["projectName"]
+          }
+        },
+        {
+          name: "dokploy_validate_config",
+          description: "Detect broken configs",
+          inputSchema: {
+            type: "object",
+            properties: {
+              applicationId: { type: "string", description: "Application ID" }
+            },
+            required: ["applicationId"]
+          }
+        },
+        {
+          name: "dokploy_regenerate_keys",
+          description: "Fix broken JWT keys",
+          inputSchema: {
+            type: "object",
+            properties: {
+              applicationId: { type: "string", description: "Application ID" }
+            },
+            required: ["applicationId"]
+          }
+        },
       ],
     }));
 
