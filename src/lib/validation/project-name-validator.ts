@@ -28,6 +28,17 @@ export class ProjectNameValidator {
     const warnings: string[] = [];
     const suggestions: string[] = [];
 
+    // Check if name is provided
+    if (!name || typeof name !== 'string') {
+      return {
+        valid: false,
+        errors: ["Project name is required"],
+        warnings: [],
+        sanitized: "",
+        suggestions: ["my-project", "test-app", "my-supabase"],
+      };
+    }
+
     // Validate with Zod schema
     const result = projectNameSchema.safeParse(name);
 
