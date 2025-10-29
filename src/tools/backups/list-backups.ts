@@ -1,4 +1,3 @@
-import type { BackupRecord } from "../../types/supabase.js";
 import type { ToolResponse } from "../../types/mcp.js";
 import fs from "node:fs/promises";
 

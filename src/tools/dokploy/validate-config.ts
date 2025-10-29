@@ -15,7 +15,6 @@ import type { DokployAPIClient } from "../../lib/dokploy/api-client.js";
 import { JWTValidator } from "../../lib/validation/jwt-validator.js";
 import { EnvParser } from "../../lib/dokploy/env-parser.js";
 import { ProjectNameValidator } from "../../lib/validation/project-name-validator.js";
-import { URLValidator } from "../../lib/validation/url-validator.js";
 import { JWTGenerator } from "../../lib/dokploy/jwt-generator.js";
 import { logger } from "../../lib/utils/logger.js";
 import type { ValidationResult } from "../../types/supabase.js";
@@ -135,9 +134,9 @@ export class ConfigValidator {
    * Check JWT keys for common issues
    */
   private checkJWTKeys(env: Record<string, string>, result: ConfigValidationResult): void {
-    const anonKey = env.ANON_KEY;
-    const serviceRoleKey = env.SERVICE_ROLE_KEY;
-    const jwtSecret = env.JWT_SECRET;
+    const anonKey = env["ANON_KEY"];
+    const serviceRoleKey = env["SERVICE_ROLE_KEY"];
+    const jwtSecret = env["JWT_SECRET"];
 
     if (!anonKey || !serviceRoleKey || !jwtSecret) {
       result.errors.push({
@@ -266,7 +265,7 @@ export class ConfigValidator {
    * Check SMTP configuration
    */
   private checkSMTPConfiguration(env: Record<string, string>, result: ConfigValidationResult): void {
-    const smtpHost = env.SMTP_HOST;
+    const smtpHost = env["SMTP_HOST"];
 
     if (!smtpHost) {
       result.warnings.push({
@@ -342,11 +341,11 @@ export class ConfigValidator {
     };
 
     // Fix JWT keys if needed
-    const jwtSecret = env.JWT_SECRET;
+    const jwtSecret = env["JWT_SECRET"];
     if (jwtSecret) {
       const dokployIssues = JWTValidator.detectDokployIssues(
-        env.ANON_KEY || "",
-        env.SERVICE_ROLE_KEY || "",
+        env["ANON_KEY"] || "",
+        env["SERVICE_ROLE_KEY"] || "",
         jwtSecret
       );
 
@@ -368,7 +367,7 @@ export class ConfigValidator {
     }
 
     // Fix HTTP URLs
-    const { upgraded, changes } = EnvParser.upgradeToHttps(env);
+    const { upgraded: _upgraded, changes } = EnvParser.upgradeToHttps(env);
 
     if (changes.length > 0) {
       fix.urlUpgrades = {};

@@ -185,10 +185,10 @@ export class UpdateEnvironmentTool {
 
     // Try to ping auth endpoint if possible
     let authWorks = false;
-    if (env.SITE_URL && env.ANON_KEY) {
+    if (env["SITE_URL"] && env["ANON_KEY"]) {
       try {
-        const response = await fetch(`${env.SITE_URL}/auth/v1/health`, {
-          headers: { apikey: env.ANON_KEY },
+        const response = await fetch(`${env["SITE_URL"]}/auth/v1/health`, {
+          headers: { apikey: env["ANON_KEY"] },
         });
         authWorks = response.ok;
       } catch {

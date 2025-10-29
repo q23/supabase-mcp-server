@@ -20,7 +20,6 @@ export class DiffGenerator {
     const targetTables = await this.getTables(targetPool, schemaName);
 
     // Find new tables
-    const sourceTableNames = new Set(sourceTables.map((t) => t.tableName));
     const targetTableNames = new Set(targetTables.map((t) => t.tableName));
 
     for (const table of sourceTables) {

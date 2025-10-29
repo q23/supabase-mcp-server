@@ -68,8 +68,8 @@ export class CrossInstanceMigration {
     const differences: string[] = [];
 
     for (const table of tables) {
-      const sourceCount = await this.sourcePool.query(`SELECT COUNT(*) FROM ${table}`);
-      const targetCount = await this.targetPool.query(`SELECT COUNT(*) FROM ${table}`);
+      const sourceCount: any = await this.sourcePool.query(`SELECT COUNT(*) FROM ${table}`);
+      const targetCount: any = await this.targetPool.query(`SELECT COUNT(*) FROM ${table}`);
 
       const sourceRows = parseInt(sourceCount.rows[0].count);
       const targetRows = parseInt(targetCount.rows[0].count);

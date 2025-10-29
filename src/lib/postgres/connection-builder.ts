@@ -146,8 +146,8 @@ export class ConnectionBuilder {
   static fromEnvironment(): ConnectionConfig {
     const host = process.env["POSTGRES_HOST"];
     const port = process.env["POSTGRES_PORT"];
-    const database = process.env.POSTGRES_DATABASE;
-    const user = process.env.POSTGRES_USER;
+    const database = process.env["POSTGRES_DATABASE"];
+    const user = process.env["POSTGRES_USER"];
     const password = process.env["POSTGRES_PASSWORD"];
 
     if (!host || !password) {
@@ -259,7 +259,7 @@ export class ConnectionBuilder {
     }
 
     // Check for Supabase URL
-    const supabaseUrl = process.env.SUPABASE_URL;
+    const supabaseUrl = process.env["SUPABASE_URL"];
     if (supabaseUrl && process.env["POSTGRES_PASSWORD"]) {
       logger.info("Using Supabase URL connection");
       // Extract project ref from URL (e.g., https://abc123.supabase.co)

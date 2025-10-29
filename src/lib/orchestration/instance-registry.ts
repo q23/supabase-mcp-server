@@ -3,7 +3,6 @@
  * Manages multiple Supabase instances
  */
 
-import type { DokployApplication } from "../../types/dokploy.js";
 
 export interface InstanceInfo {
   id: string;

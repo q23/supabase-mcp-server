@@ -31,7 +31,7 @@ export class BackupRestorer {
   async validateCompatibility(backup: BackupRecord): Promise<{ compatible: boolean; issues: string[] }> {
     const issues: string[] = [];
 
-    const versionResult = await this.pool.query("SELECT version()");
+    const versionResult: any = await this.pool.query("SELECT version()");
     const currentVersion = versionResult.rows[0].version;
 
     // Check version compatibility

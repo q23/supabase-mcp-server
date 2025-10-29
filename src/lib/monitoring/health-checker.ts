@@ -6,7 +6,6 @@
 import type { DokployAPIClient } from "../dokploy/api-client.js";
 import type { HealthStatus } from "../../types/dokploy.js";
 import type { Alert } from "../../types/mcp.js";
-import { logger } from "../utils/logger.js";
 
 export class HealthChecker {
   private dokployClient: DokployAPIClient;

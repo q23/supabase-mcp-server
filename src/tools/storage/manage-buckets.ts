@@ -8,7 +8,7 @@ export async function manageBuckets(
 ): Promise<ToolResponse> {
   try {
     if (action === "list") {
-      const { data, error } = await client.storage.listBuckets();
+      const { data: data, error } = await client.storage.listBuckets();
       if (error) throw error;
 
       return {
@@ -18,7 +18,7 @@ export async function manageBuckets(
     }
 
     if (action === "create" && bucketName) {
-      const { data, error } = await client.storage.createBucket(bucketName);
+      const { data: data, error } = await client.storage.createBucket(bucketName);
       if (error) throw error;
 
       return {

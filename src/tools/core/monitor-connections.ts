@@ -5,7 +5,6 @@
 
 import type { PostgresConnectionPool } from "../../lib/postgres/connection-pool.js";
 import type { ConnectionPoolStatus } from "../../types/supabase.js";
-import { logger } from "../../lib/utils/logger.js";
 import type { ToolResponse, Alert } from "../../types/mcp.js";
 
 export interface MonitorConnectionsResult {

@@ -33,7 +33,7 @@ export async function crossInstanceMigrate(
     const tables = input.tables || ["public.*"];
     const result = await migration.migrate(tables);
 
-    let integrityCheck = { valid: true, differences: [] };
+    let integrityCheck: { valid: boolean; differences: string[] } = { valid: true, differences: [] };
     if (input.verifyIntegrity !== false) {
       integrityCheck = await migration.verifyIntegrity(tables);
     }

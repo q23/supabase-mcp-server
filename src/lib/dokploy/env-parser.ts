@@ -282,7 +282,7 @@ export class EnvParser {
       } else if (oldValue && !newValue) {
         // Removed
         removed.push(key);
-      } else if (oldValue !== newValue) {
+      } else if (oldValue && newValue && oldValue !== newValue) {
         // Modified
         let reason = "Value changed";
 

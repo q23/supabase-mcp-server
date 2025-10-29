@@ -7,7 +7,6 @@ import type { PostgresConnectionPool } from "../postgres/connection-pool.js";
 import type { BackupRecord } from "../../types/supabase.js";
 import { Encryption } from "../utils/encryption.js";
 import { logger } from "../utils/logger.js";
-import fs from "node:fs/promises";
 import { createWriteStream } from "node:fs";
 import { createGzip } from "node:zlib";
 // import { pipeline } from "node:stream/promises";
@@ -33,7 +32,6 @@ export class BackupCreator {
     const postgresVersion = versionResult.rows[0].version;
 
     // Execute pg_dump (simplified - would use actual pg_dump)
-    const _dumpResult = await this.pool.query(
       "SELECT table_name FROM information_schema.tables WHERE table_schema = 'public'"
     );
 
@@ -41,8 +39,6 @@ export class BackupCreator {
 
     // Compress if requested
     if (options.compress) {
-      const _writeStream = createWriteStream(outputPath + ".gz");
-      const _gzip = createGzip();
       // Would pipe pg_dump output here
       outputPath += ".gz";
     }
