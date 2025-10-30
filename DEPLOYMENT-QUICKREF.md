@@ -1,6 +1,6 @@
 # Deployment Quick Reference
 
-## 🚀 One-Line Deploy
+## One-Line Deploy
 
 ```bash
 curl -sSL https://raw.githubusercontent.com/your-org/supabase-mcp-server/main/deployment/deploy.sh | bash
@@ -148,15 +148,15 @@ sudo systemctl restart supabase-mcp-server
 
 ## Key Features
 
-✅ **Auto-Start**: Boots automatically after server restart  
-✅ **Auto-Restart**: Recovers from crashes within seconds  
-✅ **Health Checks**: Monitors every 30s, auto-restarts on failure  
-✅ **Resource Limits**: CPU (2 cores) & Memory (1GB)  
-✅ **Log Rotation**: 10MB files, 3 max  
-✅ **Zero Downtime**: Rolling updates without service interruption  
-✅ **Monitoring**: Built-in health check + alerting  
-✅ **SSL/HTTPS**: Let's Encrypt integration  
+**Auto-Start**: Boots automatically after server restart
+**Auto-Restart**: Recovers from crashes within seconds
+**Health Checks**: Monitors every 30s, auto-restarts on failure
+**Resource Limits**: CPU (2 cores) & Memory (1GB)
+**Log Rotation**: 10MB files, 3 max
+**Zero Downtime**: Rolling updates without service interruption
+**Monitoring**: Built-in health check + alerting
+**SSL/HTTPS**: Let's Encrypt integration
 
 ---
 
-📖 Full docs: [docs/DEPLOYMENT.md](./docs/DEPLOYMENT.md)
+Full documentation: [docs/DEPLOYMENT.md](./docs/DEPLOYMENT.md)

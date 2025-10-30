@@ -25,11 +25,11 @@ chmod +x deployment/deploy.sh
 **Best for**: Multi-user teams, easy scaling, isolation
 
 **Features:**
-- ✅ Auto-restart on failure (`restart: always`)
-- ✅ Health checks every 30s
-- ✅ Resource limits (1GB RAM, 2 CPU)
-- ✅ Log rotation (10MB files, 3 max)
-- ✅ Auto-update with Watchtower (optional)
+- - Auto-restart on failure (`restart: always`)
+- - Health checks every 30s
+- - Resource limits (1GB RAM, 2 CPU)
+- - Log rotation (10MB files, 3 max)
+- - Auto-update with Watchtower (optional)
 
 ```bash
 # Standard deployment
@@ -78,12 +78,12 @@ pm2 monit
 ```
 
 **Features:**
-- ✅ Cluster mode (multiple instances)
-- ✅ Auto-restart on crash
-- ✅ Memory limit (1GB)
-- ✅ Cron restart (daily at 2 AM)
-- ✅ Log rotation
-- ✅ Health checks
+- - Cluster mode (multiple instances)
+- - Auto-restart on crash
+- - Memory limit (1GB)
+- - Cron restart (daily at 2 AM)
+- - Log rotation
+- - Health checks
 
 ---
 
@@ -106,11 +106,11 @@ sudo journalctl -u supabase-mcp-server -f
 ```
 
 **Features:**
-- ✅ Auto-start on boot
-- ✅ Auto-restart on failure (5 times in 5min)
-- ✅ Security hardening
-- ✅ Resource limits
-- ✅ journald logging
+- - Auto-start on boot
+- - Auto-restart on failure (5 times in 5min)
+- - Security hardening
+- - Resource limits
+- - journald logging
 
 ---
 
