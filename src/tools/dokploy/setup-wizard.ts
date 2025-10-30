@@ -31,7 +31,11 @@ export interface SetupWizardInput {
   /** Project name (will be sanitized) */
   projectName: string;
   /** Domain for Supabase (e.g., supabase.example.com) */
-  domain: string;
+  domain?: string;
+  /** Dokploy Project ID (required if projects exist, wizard will tell you) */
+  projectId?: string;
+  /** Create new project instead of using existing (default: false) */
+  createNewProject?: boolean;
   /** Use Let's Encrypt for SSL (default: true) */
   useLetsEncrypt?: boolean;
   /** SMTP configuration (optional) */
@@ -175,37 +179,45 @@ export class SetupWizard {
       // Get existing projects from Dokploy
       const projects = await this.getExistingProjects();
 
-      if (projects.length > 0) {
-        // Projects exist - return info for user to choose
+      if (projects.length > 0 && !this.input.projectId) {
+        // Projects exist but user didn't specify which one to use
         const projectList = projects.map(p => `- ${p.name} (ID: ${p.projectId})`).join('\n');
 
-        logger.info("Found existing projects", {
+        logger.error("Multiple projects found - user must choose!", {
           count: projects.length,
-          projects: projects.map(p => p.name),
         });
 
-        // For now, use first project
-        // TODO: Implement user prompt to select project
-        const selectedProject = projects[0];
+        throw new Error(
+          `Found ${projects.length} existing Dokploy project(s):\n\n${projectList}\n\n` +
+          `❌ You must specify which project to use!\n\n` +
+          `Option 1: Use existing project - add parameter:\n` +
+          `  "projectId": "<project-id-from-list>"\n\n` +
+          `Option 2: Create new project - add parameter:\n` +
+          `  "createNewProject": true\n\n` +
+          `The wizard will NOT automatically choose for you!`
+        );
+      }
 
-        logger.info("Using existing project", {
+      if (projects.length > 0 && this.input.projectId) {
+        // User specified a project - verify it exists
+        const selectedProject = projects.find(p => p.projectId === this.input.projectId);
+        if (!selectedProject) {
+          throw new Error(`Project ID "${this.input.projectId}" not found in Dokploy!`);
+        }
+
+        logger.info("Using specified project", {
           projectId: selectedProject.projectId,
           projectName: selectedProject.name,
         });
 
-        // Store selected project
-        if (!this.input.projectId) {
-          this.input.projectId = selectedProject.projectId;
-        }
+        this.recordStep(0, "Select project", "completed", Date.now() - stepStart, `Using: ${selectedProject.name}`);
       } else {
-        logger.info("No existing projects found, will create new one");
+        logger.info("No existing projects OR createNewProject=true, will create new");
+        this.recordStep(0, "Create new project", "completed", Date.now() - stepStart, "Creating new project");
       }
-
-      this.recordStep(0, "Select or create project", "completed", Date.now() - stepStart,
-        projects.length > 0 ? `Using project: ${projects[0].name}` : "Will create new project");
     } catch (error) {
-      logger.warn("Could not fetch projects, will use default", { error });
-      this.recordStep(0, "Select or create project", "skipped", Date.now() - stepStart, "Using default");
+      this.recordStep(0, "Select or create project", "failed", Date.now() - stepStart, (error as Error).message);
+      throw error;
     }
   }
 

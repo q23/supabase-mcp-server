@@ -40,8 +40,10 @@ class SupabaseMCPServer {
           inputSchema: {
             type: "object",
             properties: {
-              projectName: { type: "string", description: "Project name" },
-              domain: { type: "string", description: "Domain (optional)" }
+              projectName: { type: "string", description: "Project name for the Supabase instance" },
+              domain: { type: "string", description: "Domain (optional, defaults to projectName.local)" },
+              projectId: { type: "string", description: "Dokploy Project ID (wizard will show available projects if needed)" },
+              createNewProject: { type: "boolean", description: "Create new Dokploy project (default: false)" }
             },
             required: ["projectName"]
           }
