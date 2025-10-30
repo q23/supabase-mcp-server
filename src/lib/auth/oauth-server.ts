@@ -24,9 +24,43 @@ interface AuthorizationCode {
 export class OAuthServer {
   private config: OAuthConfig;
   private authCodes: Map<string, AuthorizationCode> = new Map();
+  private dynamicClients: Map<string, { clientId: string; clientSecret: string; createdAt: number }> = new Map();
 
   constructor(config: OAuthConfig) {
     this.config = config;
+
+    // Register default client
+    this.dynamicClients.set(config.clientId, {
+      clientId: config.clientId,
+      clientSecret: config.clientSecret,
+      createdAt: Date.now(),
+    });
+  }
+
+  /**
+   * Dynamic Client Registration (RFC 7591)
+   * For Claude Desktop auto-discovery
+   */
+  registerClient(_params: {
+    clientName?: string;
+    redirectUris?: string[];
+  }): { clientId: string; clientSecret: string; clientIdIssuedAt: number } {
+    // Generate new client credentials
+    const clientId = `client_${randomBytes(16).toString("hex")}`;
+    const clientSecret = randomBytes(32).toString("hex");
+    const createdAt = Math.floor(Date.now() / 1000);
+
+    this.dynamicClients.set(clientId, {
+      clientId,
+      clientSecret,
+      createdAt,
+    });
+
+    return {
+      clientId,
+      clientSecret,
+      clientIdIssuedAt: createdAt,
+    };
   }
 
   /**
@@ -39,8 +73,21 @@ export class OAuthServer {
     codeChallenge?: string;
     codeChallengeMethod?: string;
   }): { code: string; redirectUri: string } {
-    if (params.clientId !== this.config.clientId) {
+    // Validate client ID (check dynamic clients, including default)
+    const client = this.dynamicClients.get(params.clientId);
+    if (!client) {
       throw new Error("Invalid client_id");
+    }
+
+    // Validate redirect URI (must be Claude's callback)
+    const allowedRedirects = [
+      "https://claude.ai/api/mcp/auth_callback",
+      "https://claude.com/api/mcp/auth_callback",
+      "http://localhost:3000/callback", // For testing
+    ];
+
+    if (!allowedRedirects.some(uri => params.redirectUri.startsWith(uri))) {
+      throw new Error("Invalid redirect_uri");
     }
 
     // Generate authorization code
@@ -79,11 +126,9 @@ export class OAuthServer {
     redirectUri?: string;
     codeVerifier?: string;
   }): { accessToken: string; tokenType: string; expiresIn: number } {
-    // Validate client credentials
-    if (
-      params.clientId !== this.config.clientId ||
-      params.clientSecret !== this.config.clientSecret
-    ) {
+    // Validate client credentials (check both static and dynamic clients)
+    const client = this.dynamicClients.get(params.clientId);
+    if (!client || client.clientSecret !== params.clientSecret) {
       throw new Error("Invalid client credentials");
     }
 

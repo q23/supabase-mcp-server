@@ -178,6 +178,24 @@ class SupabaseMCPServer {
 
     // OAuth endpoints (if enabled)
     if (this.oauthServer) {
+      // Dynamic Client Registration (RFC 7591)
+      app.post("/oauth/register", (req, res) => {
+        try {
+          const result = this.oauthServer!.registerClient({
+            clientName: req.body.client_name,
+            redirectUris: req.body.redirect_uris,
+          });
+
+          res.json({
+            client_id: result.clientId,
+            client_secret: result.clientSecret,
+            client_id_issued_at: result.clientIdIssuedAt,
+          });
+        } catch (err: any) {
+          res.status(400).json({ error: err.message });
+        }
+      });
+
       // OAuth metadata endpoint
       app.get("/.well-known/oauth-authorization-server", (_req, res) => {
         const baseUrl = `https://${_req.get('host') || 'localhost'}`;
@@ -185,6 +203,7 @@ class SupabaseMCPServer {
           issuer: baseUrl,
           authorization_endpoint: `${baseUrl}/oauth/authorize`,
           token_endpoint: `${baseUrl}/oauth/token`,
+          registration_endpoint: `${baseUrl}/oauth/register`,
           response_types_supported: ["code"],
           grant_types_supported: ["authorization_code"],
           token_endpoint_auth_methods_supported: ["client_secret_post"],
