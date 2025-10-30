@@ -164,6 +164,7 @@ class SupabaseMCPServer {
   async startHTTP() {
     const app = express();
     app.use(express.json());
+    app.use(express.urlencoded({ extended: true })); // For OAuth form-encoded requests
 
     // Health endpoint (NO AUTH REQUIRED - must be before auth middleware!)
     app.get("/health", (_req, res) => {
