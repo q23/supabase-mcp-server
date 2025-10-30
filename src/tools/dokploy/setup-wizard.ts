@@ -110,6 +110,9 @@ export class SetupWizard {
     });
 
     try {
+      // Step 0: List existing projects and ask user
+      await this.step0_SelectOrCreateProject();
+
       // Step 1: Check Dokploy connectivity
       await this.step1_CheckConnectivity();
 
@@ -157,6 +160,64 @@ export class SetupWizard {
       });
 
       throw error;
+    }
+  }
+
+  /**
+   * Step 0: Select or create project
+   */
+  private async step0_SelectOrCreateProject(): Promise<void> {
+    const stepStart = Date.now();
+
+    try {
+      logger.info("[Step 0/9] Checking existing projects");
+
+      // Get existing projects from Dokploy
+      const projects = await this.getExistingProjects();
+
+      if (projects.length > 0) {
+        // Projects exist - return info for user to choose
+        const projectList = projects.map(p => `- ${p.name} (ID: ${p.projectId})`).join('\n');
+
+        logger.info("Found existing projects", {
+          count: projects.length,
+          projects: projects.map(p => p.name),
+        });
+
+        // For now, use first project
+        // TODO: Implement user prompt to select project
+        const selectedProject = projects[0];
+
+        logger.info("Using existing project", {
+          projectId: selectedProject.projectId,
+          projectName: selectedProject.name,
+        });
+
+        // Store selected project
+        if (!this.input.projectId) {
+          this.input.projectId = selectedProject.projectId;
+        }
+      } else {
+        logger.info("No existing projects found, will create new one");
+      }
+
+      this.recordStep(0, "Select or create project", "completed", Date.now() - stepStart,
+        projects.length > 0 ? `Using project: ${projects[0].name}` : "Will create new project");
+    } catch (error) {
+      logger.warn("Could not fetch projects, will use default", { error });
+      this.recordStep(0, "Select or create project", "skipped", Date.now() - stepStart, "Using default");
+    }
+  }
+
+  /**
+   * Get existing projects from Dokploy
+   */
+  private async getExistingProjects(): Promise<Array<{projectId: string; name: string}>> {
+    try {
+      const response = await this.dokployClient.request("GET", "/api/project.all");
+      return response || [];
+    } catch {
+      return [];
     }
   }
 
