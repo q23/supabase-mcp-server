@@ -1,0 +1,77 @@
+version: '3.8'
+
+# Dokploy deployment for Supabase MCP Server
+# NO port mapping - Traefik handles routing via domains
+
+services:
+  mcp-server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: supabase-mcp-server
+
+    # NO ports mapping - Dokploy/Traefik handles it!
+    # Access via domain configuration in Dokploy UI
+
+    environment:
+      # Server Config
+      NODE_ENV: production
+      MCP_PORT: 3000
+      MCP_API_KEY: ${MCP_API_KEY}
+
+      # Dokploy Integration
+      DOKPLOY_API_URL: ${DOKPLOY_API_URL}
+      DOKPLOY_API_KEY: ${DOKPLOY_API_KEY}
+
+      # Optional: Supabase Cloud
+      SUPABASE_URL: ${SUPABASE_URL:-}
+      SUPABASE_ANON_KEY: ${SUPABASE_ANON_KEY:-}
+      SUPABASE_SERVICE_ROLE_KEY: ${SUPABASE_SERVICE_ROLE_KEY:-}
+
+      # Optional: Self-hosted database
+      POSTGRES_HOST: ${POSTGRES_HOST:-}
+      POSTGRES_PORT: ${POSTGRES_PORT:-5432}
+      POSTGRES_DATABASE: ${POSTGRES_DATABASE:-postgres}
+      POSTGRES_USER: ${POSTGRES_USER:-}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-}
+
+      # Logging
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+
+    restart: always
+
+    # Resource limits
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 1G
+        reservations:
+          cpus: '0.5'
+          memory: 256M
+
+    # Logging
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+    labels:
+      - "service=mcp-server"
+      - "environment=production"
+
+    # Health check
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3000/health', (r) => { process.exit(r.statusCode === 200 ? 0 : 1); }).on('error', () => process.exit(1));"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+
+    # Traefik labels for automatic routing (optional - Dokploy UI is easier)
+    # labels:
+    #   - "traefik.enable=true"
+    #   - "traefik.http.routers.mcp.rule=Host(`mcp.dev.q23.de`)"
+    #   - "traefik.http.routers.mcp.tls=true"
+    #   - "traefik.http.services.mcp.loadbalancer.server.port=3000"
