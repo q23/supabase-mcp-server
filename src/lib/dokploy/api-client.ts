@@ -100,7 +100,7 @@ export class DokployAPIClient {
       baseURL: config.apiUrl,
       timeout: 30000,
       headers: {
-        "Authorization": `Bearer ${config.apiKey}`,
+        "x-api-key": config.apiKey,
         "Content-Type": "application/json",
       },
     });
