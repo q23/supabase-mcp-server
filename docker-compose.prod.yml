@@ -8,8 +8,14 @@ services:
       context: .
       dockerfile: Dockerfile
     container_name: supabase-mcp-server
+
+    # Port mapping - configurable via MCP_EXTERNAL_PORT
+    # For VPS/standalone: Set MCP_EXTERNAL_PORT=3000 (default)
+    # For Dokploy: Set MCP_EXTERNAL_PORT=3001 (or any unused port)
+    #              Traefik will route via domain anyway
     ports:
-      - "${MCP_PORT:-3000}:3000"
+      - "${MCP_EXTERNAL_PORT:-3000}:3000"
+
     environment:
       # Server Config
       NODE_ENV: production
