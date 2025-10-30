@@ -10,8 +10,10 @@ services:
       dockerfile: Dockerfile
     container_name: supabase-mcp-server
 
-    # NO ports mapping - Dokploy/Traefik handles it!
-    # Access via domain configuration in Dokploy UI
+    # Expose on unique port to avoid conflicts
+    # Traefik will route via domain, but this allows direct access too
+    ports:
+      - "3333:3000"
 
     environment:
       # Server Config
