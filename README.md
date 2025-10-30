@@ -56,81 +56,101 @@
 ## Installation
 
 ### Prerequisites
-- Node.js 18+
+- Node.js 18+ OR Docker
 - PostgreSQL (for self-hosted) or Supabase account
 - Optional: Dokploy instance for automated deployments
 
-### Install from npm
+## Deployment Options
 
+### Option 1: Local Use (Claude Desktop)
+
+**Install from npm:**
 ```bash
 npm install -g supabase-mcp-server
 ```
 
-### Install from source
-
-```bash
-git clone https://github.com/yourusername/supabase-mcp-server.git
-cd supabase-mcp-server
-npm install
-npm run build
-npm link
-```
-
-## Quick Start
-
-### 1. Configuration
-
-Copy `.env.example` to `.env` and configure:
-
-```bash
-cp .env.example .env
-```
-
-**For Supabase Cloud:**
-```env
-SUPABASE_URL=https://your-project.supabase.co
-SUPABASE_ANON_KEY=your-anon-key
-SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
-```
-
-**For Self-Hosted:**
-```env
-POSTGRES_HOST=your-host
-POSTGRES_PORT=5432
-POSTGRES_DATABASE=postgres
-POSTGRES_USER=postgres
-POSTGRES_PASSWORD=your-password
-```
-
-**For Dokploy Integration:**
-```env
-DOKPLOY_API_URL=https://your-dokploy.com
-DOKPLOY_API_KEY=your-api-key
-```
-
-### 2. Start the MCP Server
-
-```bash
-supabase-mcp
-```
-
-### 3. Use with Claude Desktop
-
-Add to your Claude Desktop configuration (`~/Library/Application Support/Claude/config.json` on macOS):
-
+**Configure Claude Desktop** (`~/Library/Application Support/Claude/config.json`):
 ```json
 {
   "mcpServers": {
     "supabase": {
       "command": "supabase-mcp",
       "env": {
-        "SUPABASE_URL": "https://your-project.supabase.co",
-        "SUPABASE_ANON_KEY": "your-anon-key",
-        "SUPABASE_SERVICE_ROLE_KEY": "your-service-role-key"
+        "DOKPLOY_API_URL": "https://your-dokploy.com",
+        "DOKPLOY_API_KEY": "your-api-key"
       }
     }
   }
 }
+```
+
+### Option 2: Remote Deployment (Claude Code, Teams) 🚀
+
+**Recommended for:**
+- Multi-user teams
+- Claude Code integration
+- Shared infrastructure management
+- **Production-ready with auto-start & auto-restart**
+
+#### Quick Deploy (Auto-Start + Never Down)
+
+```bash
+# 1. Clone and configure
+git clone https://github.com/yourusername/supabase-mcp-server.git
+cd supabase-mcp-server
+cp .env.example .env
+
+# 2. Generate API key
+openssl rand -hex 32 > api-key.txt
+nano .env  # Add: MCP_API_KEY=<key>, DOKPLOY_API_URL, etc.
+
+# 3. Deploy (auto-detects Docker/PM2/systemd)
+chmod +x deployment/deploy.sh
+./deployment/deploy.sh
+
+# ✅ Server auto-starts on boot
+# ✅ Auto-restarts on crash
+# ✅ Health checks every 30s
+# ✅ Zero downtime updates
+```
+
+**Deployment Methods:**
+- **Docker**: `restart: always` + health checks + auto-update (Watchtower)
+- **PM2**: Cluster mode + auto-restart + memory limits
+- **systemd**: Native Linux service + auto-boot
+
+See [Deployment Guide](./docs/DEPLOYMENT.md) for full details.
+
+4. **Configure clients:**
+See [Client Configuration Guide](./docs/CLIENT-CONFIGURATION.md)
+
+**Claude Code** (`~/.config/claude-code/mcp.json`):
+```json
+{
+  "mcpServers": {
+    "supabase": {
+      "url": "http://your-server:3000/mcp",
+      "transport": "http",
+      "headers": {
+        "Authorization": "Bearer your-api-key-here"
+      }
+    }
+  }
+}
+```
+
+### Option 3: Development
+
+```bash
+git clone https://github.com/yourusername/supabase-mcp-server.git
+cd supabase-mcp-server
+npm install
+
+# HTTP mode (for testing remote clients)
+npm run dev:http
+
+# Stdio mode (for local MCP clients)
+npm run dev
 ```
 
 ## Usage Examples
@@ -179,10 +199,11 @@ Add to your Claude Desktop configuration (`~/Library/Application Support/Claude/
 
 ## Documentation
 
-- [Full Documentation](./docs)
-- [API Reference](./docs/API.md)
-- [Troubleshooting Guide](./docs/TROUBLESHOOTING.md)
-- [Examples](./docs/EXAMPLES.md)
+- [Client Configuration Guide](./docs/CLIENT-CONFIGURATION.md) - Configure Claude Code, Claude Desktop, custom clients
+- [API Reference](./docs/API.md) - Complete tool reference
+- [Deployment Guide](./docs/DEPLOYMENT.md) - Production deployment with SSL, monitoring
+- [Troubleshooting Guide](./docs/TROUBLESHOOTING.md) - Common issues and solutions
+- [Examples](./docs/EXAMPLES.md) - Usage examples
 
 ## Development
 

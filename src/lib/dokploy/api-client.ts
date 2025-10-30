@@ -27,14 +27,12 @@ class RateLimiter {
   private lastRefill: number;
   private readonly maxTokens: number;
   private readonly refillRate: number; // tokens per second
-  private readonly burstCapacity: number;
 
   constructor(requestsPerSecond = 10, burstCapacity = 20) {
     this.maxTokens = burstCapacity;
     this.tokens = burstCapacity;
     this.lastRefill = Date.now();
     this.refillRate = requestsPerSecond;
-    this.burstCapacity = burstCapacity;
   }
 
   /**
@@ -83,11 +81,9 @@ class RateLimiter {
  */
 export class DokployAPIClient {
   private client: AxiosInstance;
-  private config: DokployConfig;
   private rateLimiter: RateLimiter;
 
   constructor(config: DokployConfig) {
-    this.config = config;
 
     // Initialize rate limiter
     this.rateLimiter = new RateLimiter(
@@ -127,7 +123,7 @@ export class DokployAPIClient {
   /**
    * Make authenticated request with rate limiting
    */
-  private async request<T>(method: string, path: string, data?: unknown): Promise<T> {
+  async request<T>(method: string, path: string, data?: unknown): Promise<T> {
     // Acquire rate limit token
     await this.rateLimiter.acquire();
 
@@ -412,21 +408,6 @@ export class DokployAPIClient {
     );
   }
 
-  /**
-   * Get default project ID
-   */
-  private async getDefaultProjectId(): Promise<string> {
-    try {
-      // Try to get first project
-      const response = await this.request<any>("GET", "/api/project.all");
-      if (response && response.length > 0) {
-        return response[0].projectId;
-      }
-    } catch {
-      // Ignore error, will use fallback
-    }
-    return "default-project";
-  }
 
   /**
    * Handle axios errors

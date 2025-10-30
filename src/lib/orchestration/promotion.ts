@@ -39,7 +39,7 @@ export class DeploymentPromotion {
     return { success: true, backupId };
   }
 
-  async rollback(targetPool: PostgresConnectionPool, backupId: string): Promise<void> {
+  async rollback(_targetPool: PostgresConnectionPool, backupId: string): Promise<void> {
     logger.info("Rolling back promotion", { backupId });
     // Would restore from backup
   }

@@ -323,8 +323,8 @@ export class Retry {
  */
 export function retryable(options: Partial<RetryOptions> = {}) {
   return function <T>(
-    target: unknown,
-    propertyKey: string,
+    _target: unknown,
+    _propertyKey: string,
     descriptor: TypedPropertyDescriptor<(...args: unknown[]) => Promise<T>>
   ) {
     const originalMethod = descriptor.value;

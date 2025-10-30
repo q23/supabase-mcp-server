@@ -21,9 +21,10 @@ export class S3Adapter {
     this.config = config;
   }
 
-  async uploadBackup(filePath: string, key: string): Promise<string> {
+  async uploadBackup(_filePath: string, key: string): Promise<string> {
     logger.info("Uploading backup to S3", { key, bucket: this.config.bucket });
     // Would use AWS SDK or S3-compatible API here
+    // In real implementation: upload file from _filePath to S3
     return `s3://${this.config.bucket}/${key}`;
   }
 

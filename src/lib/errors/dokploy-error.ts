@@ -73,7 +73,7 @@ export class DokployError extends BaseError {
           "Verify Dokploy service is running",
           "Review Dokploy API logs for more details"
         );
-        if (options?.statusCode === 500) {
+        if (options?.['statusCode'] === 500) {
           suggestions.push("Dokploy internal server error - check Dokploy server logs");
         }
         break;

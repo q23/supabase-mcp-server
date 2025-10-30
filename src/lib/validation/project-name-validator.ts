@@ -153,11 +153,14 @@ export class ProjectNameValidator {
       }
 
       // Use first word with numeric suffix
-      const firstWord = this.sanitize(words[0]);
-      if (firstWord.length >= 3) {
-        const withNumber = `${firstWord}-1`;
-        if (withNumber.length <= 32 && !suggestions.includes(withNumber)) {
-          suggestions.push(withNumber);
+      const firstWordRaw = words[0];
+      if (firstWordRaw) {
+        const firstWord = this.sanitize(firstWordRaw);
+        if (firstWord.length >= 3) {
+          const withNumber = `${firstWord}-1`;
+          if (withNumber.length <= 32 && !suggestions.includes(withNumber)) {
+            suggestions.push(withNumber);
+          }
         }
       }
     }

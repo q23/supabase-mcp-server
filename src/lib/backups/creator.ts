@@ -7,8 +7,9 @@ import type { PostgresConnectionPool } from "../postgres/connection-pool.js";
 import type { BackupRecord } from "../../types/supabase.js";
 import { Encryption } from "../utils/encryption.js";
 import { logger } from "../utils/logger.js";
-import { createWriteStream } from "node:fs";
-import { createGzip } from "node:zlib";
+// Imports for future implementation
+// import { createWriteStream } from "node:fs";
+// import { createGzip } from "node:zlib";
 // import { pipeline } from "node:stream/promises";
 
 export class BackupCreator {
@@ -29,9 +30,11 @@ export class BackupCreator {
 
     // Get database metadata
     const versionResult = await this.pool.query("SELECT version()");
-    const postgresVersion = versionResult.rows[0].version;
+    const firstRow = versionResult.rows[0] as { version: string } | undefined;
+    const postgresVersion = firstRow?.version || "unknown";
 
-    // Execute pg_dump (simplified - would use actual pg_dump)
+    // Get table list for metadata (simplified - would use actual pg_dump for real implementation)
+    await this.pool.query(
       "SELECT table_name FROM information_schema.tables WHERE table_schema = 'public'"
     );
 

@@ -99,7 +99,9 @@ export class SupabaseClientWrapper {
         version: version || undefined,
       };
     } catch (error) {
-      logger.warn("Failed to get project metadata", error as Error);
+      logger.warn("Failed to get project metadata", {
+        error: error instanceof Error ? error.message : String(error),
+      });
       return {};
     }
   }
@@ -167,7 +169,9 @@ export class SupabaseClientWrapper {
         tables: data?.length || 0,
       };
     } catch (error) {
-      logger.warn("Failed to get database stats", error as Error);
+      logger.warn("Failed to get database stats", {
+        error: error instanceof Error ? error.message : String(error),
+      });
       return { tables: 0 };
     }
   }

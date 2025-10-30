@@ -186,7 +186,7 @@ export class BufferManager {
         await fs.unlink(this.tempFilePath);
         logger.debug("Temp file deleted", { tempFilePath: this.tempFilePath });
       } catch (error) {
-        logger.warn("Failed to delete temp file", undefined, {
+        logger.warn("Failed to delete temp file", {
           tempFilePath: this.tempFilePath,
           error: error instanceof Error ? error.message : String(error),
         });
@@ -209,7 +209,7 @@ export class BufferManager {
     return new (require("stream").Writable)({
       async write(
         chunk: Buffer,
-        encoding: string,
+        _encoding: string,
         callback: (error?: Error | null) => void
       ): Promise<void> {
         try {

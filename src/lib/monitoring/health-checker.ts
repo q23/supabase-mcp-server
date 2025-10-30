@@ -23,7 +23,7 @@ export class HealthChecker {
 
     // Check for unhealthy containers
     for (const container of health.containers) {
-      if (container.status !== "passing") {
+      if (container.status !== "healthy") {
         alerts.push({
           alertId: crypto.randomUUID(),
           severity: "high",
@@ -48,7 +48,7 @@ export class HealthChecker {
     };
   }
 
-  async checkResourceUsage(applicationId: string): Promise<Alert[]> {
+  async checkResourceUsage(_applicationId: string): Promise<Alert[]> {
     const alerts: Alert[] = [];
     // Would check CPU, memory, disk usage here
     return alerts;

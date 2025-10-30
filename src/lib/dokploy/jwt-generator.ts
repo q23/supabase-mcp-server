@@ -130,15 +130,15 @@ export class JWTGenerator {
     }
 
     if (!anonValidation.valid) {
-      logger.error("ANON_KEY validation failed", { errors: anonValidation.errors });
-      throw new Error(`ANON_KEY validation failed: ${anonValidation.errors.join(", ")}`);
+      const errorMessage = `ANON_KEY validation failed: ${anonValidation.errors.join(", ")}`;
+      logger.error(errorMessage);
+      throw new Error(errorMessage);
     }
 
     if (!serviceValidation.valid) {
-      logger.error("SERVICE_ROLE_KEY validation failed", { errors: serviceValidation.errors });
-      throw new Error(
-        `SERVICE_ROLE_KEY validation failed: ${serviceValidation.errors.join(", ")}`
-      );
+      const errorMessage = `SERVICE_ROLE_KEY validation failed: ${serviceValidation.errors.join(", ")}`;
+      logger.error(errorMessage);
+      throw new Error(errorMessage);
     }
 
     logger.info("JWT key set generated successfully", {
@@ -192,8 +192,14 @@ export class JWTGenerator {
       throw new Error(`Invalid expiresIn format: ${expiresIn}`);
     }
 
-    const value = parseInt(match[1]);
+    const valueStr = match[1];
     const unit = match[2];
+
+    if (!valueStr || !unit) {
+      throw new Error(`Invalid expiresIn format: ${expiresIn}`);
+    }
+
+    const value = parseInt(valueStr, 10);
 
     const multipliers: Record<string, number> = {
       y: 365 * 24 * 60 * 60,
@@ -203,7 +209,12 @@ export class JWTGenerator {
       s: 1,
     };
 
-    const seconds = value * multipliers[unit];
+    const multiplier = multipliers[unit];
+    if (multiplier === undefined) {
+      throw new Error(`Invalid time unit: ${unit}`);
+    }
+
+    const seconds = value * multiplier;
     return Math.floor(Date.now() / 1000) + seconds;
   }
 
@@ -287,7 +298,7 @@ export class JWTGenerator {
    * Compare generated keys with Dokploy template keys
    */
   static compareWithDokployKeys(
-    generatedKeys: GeneratedJWTKeys,
+    _generatedKeys: GeneratedJWTKeys,
     dokployKeys: { anonKey: string; serviceRoleKey: string; jwtSecret: string }
   ): {
     identical: boolean;

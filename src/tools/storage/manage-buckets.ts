@@ -18,7 +18,7 @@ export async function manageBuckets(
     }
 
     if (action === "create" && bucketName) {
-      const { data: data, error } = await client.storage.createBucket(bucketName);
+      const { data: _data, error } = await client.storage.createBucket(bucketName);
       if (error) throw error;
 
       return {

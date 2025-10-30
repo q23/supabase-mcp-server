@@ -93,7 +93,7 @@ export class TempFileManager {
       this.trackedFiles.delete(filePath);
       logger.debug("Temp file deleted", { path: filePath });
     } catch (error) {
-      logger.warn("Failed to delete temp file", undefined, {
+      logger.warn("Failed to delete temp file", {
         path: filePath,
         error: error instanceof Error ? error.message : String(error),
       });
@@ -159,7 +159,9 @@ export class TempFileManager {
         logger.info("Orphaned temp files cleaned up", { count: orphaned });
       }
     } catch (error) {
-      logger.warn("Failed to scan orphaned files", error as Error);
+      logger.warn("Failed to scan orphaned files", {
+        error: error instanceof Error ? error.message : String(error),
+      });
     }
   }
 

@@ -63,9 +63,11 @@ export class EnvParser {
       const match = line.match(/^([A-Z_][A-Z0-9_]*)\s*=\s*(.*)$/);
       if (match) {
         const [, key, value] = match;
-        // Remove quotes if present
-        const cleanValue = value.replace(/^["']|["']$/g, "").trim();
-        variables[key] = cleanValue;
+        if (key && value !== undefined) {
+          // Remove quotes if present
+          const cleanValue = value.replace(/^["']|["']$/g, "").trim();
+          variables[key] = cleanValue;
+        }
       }
     }
 
@@ -230,13 +232,16 @@ export class EnvParser {
     }
 
     // Check JWT secret length
-    if (variables.JWT_SECRET && variables.JWT_SECRET.length < 32) {
+    const jwtSecret = variables["JWT_SECRET"];
+    if (jwtSecret && jwtSecret.length < 32) {
       warnings.push("JWT_SECRET should be at least 32 characters for security");
     }
 
     // Check ANON_KEY and SERVICE_ROLE_KEY are different
-    if (variables.ANON_KEY && variables.SERVICE_ROLE_KEY) {
-      if (variables.ANON_KEY === variables.SERVICE_ROLE_KEY) {
+    const anonKey = variables["ANON_KEY"];
+    const serviceRoleKey = variables["SERVICE_ROLE_KEY"];
+    if (anonKey && serviceRoleKey) {
+      if (anonKey === serviceRoleKey) {
         errors.push("ANON_KEY and SERVICE_ROLE_KEY must be different (Dokploy template bug)");
       }
     }

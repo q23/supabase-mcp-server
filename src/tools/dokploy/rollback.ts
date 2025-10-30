@@ -3,7 +3,7 @@ import type { ToolResponse } from "../../types/mcp.js";
 
 export async function rollback(
   applicationId: string,
-  dokployClient: DokployAPIClient
+  _dokployClient: DokployAPIClient
 ): Promise<ToolResponse> {
   try {
     // Would implement rollback via Dokploy API

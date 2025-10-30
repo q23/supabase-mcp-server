@@ -96,7 +96,7 @@ export class PostgresConnectionPool {
   /**
    * Execute query
    */
-  async query<T = unknown>(text: string, values?: unknown[]): Promise<pg.QueryResult<T>> {
+  async query<T extends pg.QueryResultRow = any>(text: string, values?: unknown[]): Promise<pg.QueryResult<T>> {
     const startTime = Date.now();
 
     try {

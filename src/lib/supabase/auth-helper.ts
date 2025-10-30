@@ -62,7 +62,9 @@ export class AuthHelper {
 
       return count || 0;
     } catch (error) {
-      logger.warn("Failed to get user count", error as Error);
+      logger.warn("Failed to get user count", {
+        error: error instanceof Error ? error.message : String(error),
+      });
       return 0;
     }
   }
@@ -94,13 +96,13 @@ export class AuthHelper {
       }
 
       const users: AuthUserInfo[] = (data || []).map((user: Record<string, unknown>) => ({
-        id: user.id as string,
-        email: user.email as string | undefined,
-        phone: user.phone as string | undefined,
-        emailConfirmedAt: user.email_confirmed_at as string | undefined,
-        phoneConfirmedAt: user.phone_confirmed_at as string | undefined,
-        lastSignInAt: user.last_sign_in_at as string | undefined,
-        createdAt: user.created_at as string,
+        id: user['id'] as string,
+        email: user['email'] as string | undefined,
+        phone: user['phone'] as string | undefined,
+        emailConfirmedAt: user['email_confirmed_at'] as string | undefined,
+        phoneConfirmedAt: user['phone_confirmed_at'] as string | undefined,
+        lastSignInAt: user['last_sign_in_at'] as string | undefined,
+        createdAt: user['created_at'] as string,
       }));
 
       return {
@@ -149,7 +151,10 @@ export class AuthHelper {
         createdAt: data.created_at,
       };
     } catch (error) {
-      logger.warn("Failed to get user by ID", error as Error, { userId });
+      logger.warn("Failed to get user by ID", {
+        userId,
+        error: error instanceof Error ? error.message : String(error),
+      });
       return null;
     }
   }
@@ -183,7 +188,9 @@ export class AuthHelper {
         createdAt: data.created_at,
       };
     } catch (error) {
-      logger.warn("Failed to get user by email", error as Error);
+      logger.warn("Failed to get user by email", {
+        error: error instanceof Error ? error.message : String(error),
+      });
       return null;
     }
   }
@@ -241,7 +248,9 @@ export class AuthHelper {
         verifiedPhones: verifiedPhones || 0,
       };
     } catch (error) {
-      logger.warn("Failed to get auth stats", error as Error);
+      logger.warn("Failed to get auth stats", {
+        error: error instanceof Error ? error.message : String(error),
+      });
       return {
         totalUsers: 0,
         verifiedEmails: 0,

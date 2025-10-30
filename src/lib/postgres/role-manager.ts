@@ -6,6 +6,7 @@
 import type { PostgresConnectionPool } from "./connection-pool.js";
 import { logger } from "../utils/logger.js";
 import { ConnectionError } from "../errors/connection-error.js";
+import type * as pg from "pg";
 
 /**
  * PostgreSQL Role
@@ -60,7 +61,9 @@ export class RoleManager {
         availableRoles: Array.from(this.availableRoles),
       });
     } catch (error) {
-      logger.warn("Failed to initialize role manager, will use default role", error as Error);
+      logger.warn("Failed to initialize role manager, will use default role", {
+        error: error instanceof Error ? error.message : String(error),
+      });
     }
   }
 
@@ -89,7 +92,7 @@ export class RoleManager {
   /**
    * Execute query with specific role
    */
-  async executeWithRole<T = unknown>(
+  async executeWithRole<T extends pg.QueryResultRow = any>(
     role: PostgresRole,
     query: string,
     values?: unknown[]
@@ -155,21 +158,21 @@ export class RoleManager {
   /**
    * Execute query on auth schema (uses correct role automatically)
    */
-  async executeAuthQuery<T = unknown>(query: string, values?: unknown[]): Promise<T[]> {
+  async executeAuthQuery<T extends pg.QueryResultRow = any>(query: string, values?: unknown[]): Promise<T[]> {
     return this.executeWithRole<T>("supabase_auth_admin", query, values);
   }
 
   /**
    * Execute query on storage schema
    */
-  async executeStorageQuery<T = unknown>(query: string, values?: unknown[]): Promise<T[]> {
+  async executeStorageQuery<T extends pg.QueryResultRow = any>(query: string, values?: unknown[]): Promise<T[]> {
     return this.executeWithRole<T>("supabase_admin", query, values);
   }
 
   /**
    * Execute query with automatic role detection based on schema
    */
-  async executeWithAutoRole<T = unknown>(
+  async executeWithAutoRole<T extends pg.QueryResultRow = any>(
     query: string,
     values?: unknown[],
     targetSchema?: string

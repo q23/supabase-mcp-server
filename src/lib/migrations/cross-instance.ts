@@ -33,15 +33,20 @@ export class CrossInstanceMigration {
 
       // Insert into target (simplified - would use COPY in production)
       if (rows.length > 0) {
-        const columns = Object.keys(rows[0]);
-        const placeholders = columns.map((_, i) => `$${i + 1}`).join(", ");
+        const firstRow = rows[0];
+        if (typeof firstRow === 'object' && firstRow !== null) {
+          const columns = Object.keys(firstRow);
+          const placeholders = columns.map((_, i) => `$${i + 1}`).join(", ");
 
-        for (const row of rows) {
-          const values = columns.map((col) => row[col]);
-          await this.targetPool.query(
-            `INSERT INTO ${table} (${columns.join(", ")}) VALUES (${placeholders})`,
-            values
-          );
+          for (const row of rows) {
+            if (typeof row === 'object' && row !== null) {
+              const values = columns.map((col) => (row as Record<string, unknown>)[col]);
+              await this.targetPool.query(
+                `INSERT INTO ${table} (${columns.join(", ")}) VALUES (${placeholders})`,
+                values
+              );
+            }
+          }
         }
       }
 

@@ -1,0 +1,46 @@
+[Unit]
+Description=Supabase MCP Server (HTTP/SSE)
+Documentation=https://github.com/yourusername/supabase-mcp-server
+After=network.target
+
+[Service]
+Type=simple
+User=mcp-server
+Group=mcp-server
+WorkingDirectory=/opt/supabase-mcp-server
+
+# Environment
+EnvironmentFile=/opt/supabase-mcp-server/.env
+
+# Start command
+ExecStart=/usr/bin/node /opt/supabase-mcp-server/dist/server-http.js
+
+# Restart policy - ALWAYS restart
+Restart=always
+RestartSec=10s
+
+# Start limit - if it fails 5 times in 5min, stop trying
+StartLimitIntervalSec=300
+StartLimitBurst=5
+
+# Security hardening
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/opt/supabase-mcp-server/logs
+
+# Resource limits
+LimitNOFILE=65536
+LimitNPROC=4096
+
+# Logging
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=supabase-mcp-server
+
+# Kill timeout
+TimeoutStopSec=30s
+
+[Install]
+WantedBy=multi-user.target

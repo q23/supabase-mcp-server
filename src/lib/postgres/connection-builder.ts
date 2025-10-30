@@ -264,9 +264,13 @@ export class ConnectionBuilder {
       logger.info("Using Supabase URL connection");
       // Extract project ref from URL (e.g., https://abc123.supabase.co)
       const match = supabaseUrl.match(/https?:\/\/([^.]+)\.supabase\.co/);
-      if (match) {
+      if (match && match[1]) {
         const projectRef = match[1];
-        const { direct } = this.parseSupabaseConnection(projectRef, process.env["POSTGRES_PASSWORD"]);
+        const password = process.env["POSTGRES_PASSWORD"];
+        if (!password) {
+          throw new Error("POSTGRES_PASSWORD environment variable is required");
+        }
+        const { direct } = this.parseSupabaseConnection(projectRef, password);
         return direct;
       }
     }
@@ -291,21 +295,34 @@ export class ConnectionBuilder {
         if (typeof input !== "object") {
           throw new Error("Components format requires object input");
         }
-        return {
-          host: input.host || "localhost",
-          port: parseInt(input.port || "5432"),
-          database: input.database || "postgres",
-          user: input.user || "postgres",
-          password: input.password,
-          pooled: false,
-        };
+        {
+          const pwd = input['password'];
+          if (!pwd) {
+            throw new Error("Password is required for connection");
+          }
+          return {
+            host: input['host'] || "localhost",
+            port: parseInt(input['port'] || "5432"),
+            database: input['database'] || "postgres",
+            user: input['user'] || "postgres",
+            password: pwd,
+            pooled: false,
+          };
+        }
 
       case "supabase_url":
         if (typeof input !== "object") {
           throw new Error("Supabase format requires object with projectRef and password");
         }
-        const { direct } = this.parseSupabaseConnection(input.projectRef, input.password);
-        return direct;
+        {
+          const projectRef = input['projectRef'];
+          const password = input['password'];
+          if (!projectRef || !password) {
+            throw new Error("Both projectRef and password are required for Supabase connection");
+          }
+          const { direct } = this.parseSupabaseConnection(projectRef, password);
+          return direct;
+        }
 
       case "docker_internal":
         if (typeof input !== "object") {

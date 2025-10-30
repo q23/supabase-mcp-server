@@ -1,0 +1,122 @@
+# Production deployment for Supabase MCP Server (HTTP/SSE mode)
+# Use this for central deployment accessible by multiple clients
+
+services:
+  # Supabase MCP Server (HTTP/SSE mode)
+  mcp-server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: supabase-mcp-server
+    ports:
+      - "${MCP_PORT:-3000}:3000"
+    environment:
+      # Server Config
+      NODE_ENV: production
+      MCP_PORT: 3000
+      MCP_API_KEY: ${MCP_API_KEY}  # Bearer token for authentication
+
+      # Dokploy Integration
+      DOKPLOY_API_URL: ${DOKPLOY_API_URL}
+      DOKPLOY_API_KEY: ${DOKPLOY_API_KEY}
+
+      # Optional: Supabase Cloud (if managing cloud instances)
+      SUPABASE_URL: ${SUPABASE_URL:-}
+      SUPABASE_ANON_KEY: ${SUPABASE_ANON_KEY:-}
+      SUPABASE_SERVICE_ROLE_KEY: ${SUPABASE_SERVICE_ROLE_KEY:-}
+
+      # Optional: Self-hosted Supabase database
+      POSTGRES_HOST: ${POSTGRES_HOST:-}
+      POSTGRES_PORT: ${POSTGRES_PORT:-5432}
+      POSTGRES_DATABASE: ${POSTGRES_DATABASE:-postgres}
+      POSTGRES_USER: ${POSTGRES_USER:-}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-}
+
+      # Logging
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+
+    # Restart policy: always restart unless explicitly stopped
+    restart: always
+
+    # Resource limits (adjust based on your needs)
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 1G
+        reservations:
+          cpus: '0.5'
+          memory: 256M
+
+    # Logging configuration
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+        labels: "service,environment"
+
+    labels:
+      - "service=mcp-server"
+      - "environment=production"
+      - "com.centurylinklabs.watchtower.enable=true"  # Auto-update support
+
+    networks:
+      - mcp-network
+
+    # Health check with auto-restart on failure
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3000/health', (r) => { process.exit(r.statusCode === 200 ? 0 : 1); }).on('error', () => process.exit(1));"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+
+  # Optional: Nginx reverse proxy with SSL
+  nginx:
+    image: nginx:alpine
+    container_name: mcp-nginx
+    ports:
+      - "443:443"
+      - "80:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./ssl:/etc/nginx/ssl:ro  # Mount your SSL certificates here
+    depends_on:
+      mcp-server:
+        condition: service_healthy
+    restart: always
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    networks:
+      - mcp-network
+    profiles:
+      - with-ssl  # Only start with: docker-compose -f docker-compose.prod.yml --profile with-ssl up
+
+  # Watchtower - Auto-update containers
+  watchtower:
+    image: containrrr/watchtower
+    container_name: mcp-watchtower
+    restart: always
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      - WATCHTOWER_CLEANUP=true
+      - WATCHTOWER_POLL_INTERVAL=3600  # Check every hour
+      - WATCHTOWER_LABEL_ENABLE=true
+      - WATCHTOWER_INCLUDE_STOPPED=false
+    profiles:
+      - with-autoupdate
+
+networks:
+  mcp-network:
+    driver: bridge

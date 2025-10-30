@@ -118,7 +118,7 @@ export class ConnectionError extends BaseError {
           "Increase the connection pool max size",
           "Check for connection leaks (unclosed connections)",
           "Monitor active connections: pg_stat_activity",
-          `Current pool max: ${options?.maxConnections || "unknown"} - consider increasing`
+          `Current pool max: ${options?.['maxConnections'] || "unknown"} - consider increasing`
         );
         break;
 
@@ -133,7 +133,7 @@ export class ConnectionError extends BaseError {
 
       case "dns_resolution_failed":
         suggestions.push(
-          `Verify hostname "${options?.host || "unknown"}" is correct`,
+          `Verify hostname "${options?.['host'] || "unknown"}" is correct`,
           "Check DNS server configuration",
           "Try using IP address instead of hostname",
           "Ensure /etc/hosts or DNS records are correct"

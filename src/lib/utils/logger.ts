@@ -60,7 +60,7 @@ export class Logger {
 
   private constructor(config: Partial<LoggerConfig> = {}) {
     this.config = {
-      level: config.level || (process.env.LOG_LEVEL as LogLevel) || "info",
+      level: config.level || (process.env['LOG_LEVEL'] as LogLevel) || "info",
       suppressSecrets: config.suppressSecrets ?? true,
       outputFormat: config.outputFormat || "text",
     };
@@ -140,7 +140,7 @@ export class Logger {
 
     // Add sanitized context
     if (context) {
-      entry.context = this.sanitize(context);
+      entry.context = this.sanitize(context) as Record<string, unknown>;
     }
 
     // Output to stderr (stdout is reserved for MCP protocol)

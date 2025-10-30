@@ -110,7 +110,7 @@ export class BaseError extends Error {
       });
     }
 
-    if (this.cause) {
+    if (this.cause && this.cause instanceof Error) {
       formatted += `\n\nCaused by: ${this.cause.message}`;
     }
 

@@ -90,9 +90,9 @@ export class RegenerateKeysTool {
     const application = await this.dokployClient.getApplication(input.applicationId);
     const currentEnv = application.env;
 
-    const anonKey = currentEnv.ANON_KEY;
-    const serviceRoleKey = currentEnv.SERVICE_ROLE_KEY;
-    const jwtSecret = currentEnv.JWT_SECRET;
+    const anonKey = currentEnv['ANON_KEY'];
+    const serviceRoleKey = currentEnv['SERVICE_ROLE_KEY'];
+    const jwtSecret = currentEnv['JWT_SECRET'];
 
     if (!jwtSecret) {
       throw new Error("JWT_SECRET not found in application environment");
@@ -181,9 +181,9 @@ export class RegenerateKeysTool {
 
     // Step 7: Validate auth endpoint (if requested)
     let authValidation;
-    if (input.validateAuth !== false && currentEnv.SITE_URL) {
+    if (input.validateAuth !== false && currentEnv['SITE_URL']) {
       authValidation = await JWTGenerator.validateAuthEndpoint(
-        currentEnv.SITE_URL,
+        currentEnv['SITE_URL'],
         newKeySet.anonKey,
         newKeySet.serviceRoleKey
       );
@@ -213,22 +213,6 @@ export class RegenerateKeysTool {
     };
   }
 
-  /**
-   * Detect destructive changes
-   */
-  private detectDestructiveChanges(
-    oldEnv: Record<string, string>,
-    newEnv: Record<string, string>
-  ): string[] {
-    const destructive: string[] = [];
-
-    // Changing POSTGRES_PASSWORD requires data migration
-    if (oldEnv.POSTGRES_PASSWORD && newEnv.POSTGRES_PASSWORD !== oldEnv.POSTGRES_PASSWORD) {
-      destructive.push("POSTGRES_PASSWORD change requires database migration");
-    }
-
-    return destructive;
-  }
 }
 
 /**

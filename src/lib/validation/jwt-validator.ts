@@ -67,28 +67,28 @@ export class JWTValidator {
       const payload = verified as Record<string, unknown>;
 
       // Check required Supabase claims
-      if (!payload.role) {
+      if (!payload['role']) {
         errors.push("Missing 'role' claim (required: anon, authenticated, or service_role)");
-      } else if (!["anon", "authenticated", "service_role"].includes(payload.role as string)) {
+      } else if (!["anon", "authenticated", "service_role"].includes(payload['role'] as string)) {
         errors.push(
-          `Invalid 'role' claim: ${payload.role} (expected: anon, authenticated, or service_role)`
+          `Invalid 'role' claim: ${payload['role']} (expected: anon, authenticated, or service_role)`
         );
       }
 
-      if (!payload.iss) {
+      if (!payload['iss']) {
         errors.push("Missing 'iss' (issuer) claim");
-      } else if (payload.iss !== "supabase") {
-        errors.push(`Invalid 'iss' claim: ${payload.iss} (expected: supabase)`);
+      } else if (payload['iss'] !== "supabase") {
+        errors.push(`Invalid 'iss' claim: ${payload['iss']} (expected: supabase)`);
       }
 
-      if (!payload.iat) {
+      if (!payload['iat']) {
         warnings.push("Missing 'iat' (issued at) claim");
       }
 
-      if (!payload.exp) {
+      if (!payload['exp']) {
         warnings.push("Missing 'exp' (expiration) claim");
       } else {
-        const exp = payload.exp as number;
+        const exp = payload['exp'] as number;
         const now = Math.floor(Date.now() / 1000);
         if (exp < now) {
           errors.push(`JWT token expired at ${new Date(exp * 1000).toISOString()}`);

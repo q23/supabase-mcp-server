@@ -382,7 +382,7 @@ export class SetupWizard {
       }
 
       // Upgrade HTTP to HTTPS
-      const { upgraded, changes } = EnvParser.upgradeToHttps(env);
+      const { upgraded: _upgraded, changes } = EnvParser.upgradeToHttps(env);
 
       if (changes.length > 0) {
         logger.info("Upgraded HTTP URLs to HTTPS", {
@@ -415,8 +415,9 @@ export class SetupWizard {
       // Create application
       const application = await this.dokployClient.createApplication({
         projectName: this.input.projectName,
-        domain: this.input.domain,
+        domain: this.input.domain || this.input.projectName,
         env: upgraded,
+        projectId: this.input.projectId,
       });
 
       this.result.applicationId = application.id;
@@ -543,12 +544,12 @@ export class SetupWizard {
 
     // Add SMTP if provided
     if (this.input.smtp) {
-      env.SMTP_HOST = this.input.smtp.host;
-      env.SMTP_PORT = this.input.smtp.port.toString();
-      env.SMTP_USER = this.input.smtp.user || "";
-      env.SMTP_PASS = this.input.smtp.password || "";
-      env.SMTP_SENDER_NAME = "Supabase";
-      env.SMTP_ADMIN_EMAIL = this.input.smtp.from;
+      env['SMTP_HOST'] = this.input.smtp.host;
+      env['SMTP_PORT'] = this.input.smtp.port.toString();
+      env['SMTP_USER'] = this.input.smtp.user || "";
+      env['SMTP_PASS'] = this.input.smtp.password || "";
+      env['SMTP_SENDER_NAME'] = "Supabase";
+      env['SMTP_ADMIN_EMAIL'] = this.input.smtp.from;
     }
 
     return env;
