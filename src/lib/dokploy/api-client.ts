@@ -160,16 +160,11 @@ export class DokployAPIClient {
           domain: config.domain,
         });
 
-        // First, get or create a project
-        const projectId = config.projectId || await this.getDefaultProjectId();
-
         const response = await this.request<DokployApplication>("POST", "/api/application.create", {
           name: config.projectName,
           appName: config.projectName,
           description: "Supabase instance deployed via MCP",
-          projectId,
-          serverId: null,
-          environmentId: "production", // Default environment
+          projectId: config.projectId!,
         });
 
         logger.info("Dokploy application created", {

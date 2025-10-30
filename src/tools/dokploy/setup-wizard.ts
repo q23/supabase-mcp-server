@@ -32,10 +32,10 @@ export interface SetupWizardInput {
   projectName: string;
   /** Domain for Supabase (e.g., supabase.example.com) */
   domain?: string;
-  /** Dokploy Project ID (required if projects exist, wizard will tell you) */
+  /** Dokploy Project ID (internal, set by wizard) */
   projectId?: string;
-  /** Create new project instead of using existing (default: false) */
-  createNewProject?: boolean;
+  /** Dokploy Environment ID (internal, set by wizard) */
+  environmentId?: string;
   /** Use Let's Encrypt for SSL (default: true) */
   useLetsEncrypt?: boolean;
   /** SMTP configuration (optional) */
@@ -168,68 +168,36 @@ export class SetupWizard {
   }
 
   /**
-   * Step 0: Select or create project
+   * Step 0: Create or select project and get environmentId
    */
   private async step0_SelectOrCreateProject(): Promise<void> {
     const stepStart = Date.now();
 
     try {
-      logger.info("[Step 0/9] Checking existing projects");
+      logger.info("[Step 0/9] Setting up Dokploy project");
 
-      // Get existing projects from Dokploy
-      const projects = await this.getExistingProjects();
+      // Create new project for this deployment
+      const projectName = `supabase-${this.input.projectName}`;
+      const projectResponse: any = await this.dokployClient.request("POST", "/api/project.create", {
+        name: projectName,
+        description: `Supabase instance: ${this.input.projectName}`,
+      });
 
-      if (projects.length > 0 && !this.input.projectId) {
-        // Projects exist but user didn't specify which one to use
-        const projectList = projects.map(p => `- ${p.name} (ID: ${p.projectId})`).join('\n');
+      // Extract projectId and environmentId from response
+      this.input.projectId = projectResponse.project.projectId;
+      this.input.environmentId = projectResponse.environment.environmentId;
 
-        logger.error("Multiple projects found - user must choose!", {
-          count: projects.length,
-        });
+      logger.info("Project created", {
+        projectId: this.input.projectId,
+        environmentId: this.input.environmentId,
+        projectName,
+      });
 
-        throw new Error(
-          `Found ${projects.length} existing Dokploy project(s):\n\n${projectList}\n\n` +
-          `❌ You must specify which project to use!\n\n` +
-          `Option 1: Use existing project - add parameter:\n` +
-          `  "projectId": "<project-id-from-list>"\n\n` +
-          `Option 2: Create new project - add parameter:\n` +
-          `  "createNewProject": true\n\n` +
-          `The wizard will NOT automatically choose for you!`
-        );
-      }
-
-      if (projects.length > 0 && this.input.projectId) {
-        // User specified a project - verify it exists
-        const selectedProject = projects.find(p => p.projectId === this.input.projectId);
-        if (!selectedProject) {
-          throw new Error(`Project ID "${this.input.projectId}" not found in Dokploy!`);
-        }
-
-        logger.info("Using specified project", {
-          projectId: selectedProject.projectId,
-          projectName: selectedProject.name,
-        });
-
-        this.recordStep(0, "Select project", "completed", Date.now() - stepStart, `Using: ${selectedProject.name}`);
-      } else {
-        logger.info("No existing projects OR createNewProject=true, will create new");
-        this.recordStep(0, "Create new project", "completed", Date.now() - stepStart, "Creating new project");
-      }
+      this.recordStep(0, "Create project", "completed", Date.now() - stepStart,
+        `Project: ${projectName} (${this.input.projectId})`);
     } catch (error) {
-      this.recordStep(0, "Select or create project", "failed", Date.now() - stepStart, (error as Error).message);
+      this.recordStep(0, "Create project", "failed", Date.now() - stepStart, (error as Error).message);
       throw error;
-    }
-  }
-
-  /**
-   * Get existing projects from Dokploy
-   */
-  private async getExistingProjects(): Promise<Array<{projectId: string; name: string}>> {
-    try {
-      const response = await this.dokployClient.request("GET", "/api/project.all");
-      return response || [];
-    } catch {
-      return [];
     }
   }
 
