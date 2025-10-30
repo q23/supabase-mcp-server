@@ -4,7 +4,7 @@
 
 ```bash
 # 1. Clone and setup
-git clone https://github.com/yourusername/supabase-mcp-server.git
+git clone https://github.com/q23/supabase-mcp-server.git
 cd supabase-mcp-server
 cp .env.example .env
 
@@ -130,5 +130,5 @@ Add to `~/Library/Application Support/Claude/claude_desktop_config.json`:
 
 ## Need Help?
 
-- Issues: https://github.com/yourusername/supabase-mcp-server/issues
+- Issues: https://github.com/q23/supabase-mcp-server/issues
 - Docs: [./docs](./docs)

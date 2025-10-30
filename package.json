@@ -37,11 +37,11 @@
     "backup",
     "automation"
   ],
-  "author": "",
+  "author": "A-D-E",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/yourusername/supabase-mcp-server.git"
+    "url": "https://github.com/q23/supabase-mcp-server.git"
   },
   "engines": {
     "node": ">=18.0.0"

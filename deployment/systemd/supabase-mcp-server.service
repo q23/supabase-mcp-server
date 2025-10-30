@@ -1,6 +1,6 @@
 [Unit]
 Description=Supabase MCP Server (HTTP/SSE)
-Documentation=https://github.com/yourusername/supabase-mcp-server
+Documentation=https://github.com/q23/supabase-mcp-server
 After=network.target
 
 [Service]

@@ -2,7 +2,7 @@
 
 **Production-ready MCP server providing comprehensive Supabase management capabilities for both cloud and self-hosted instances.**
 
-[![CI](https://github.com/yourusername/supabase-mcp-server/workflows/CI/badge.svg)](https://github.com/yourusername/supabase-mcp-server/actions)
+[![CI](https://github.com/q23/supabase-mcp-server/workflows/CI/badge.svg)](https://github.com/q23/supabase-mcp-server/actions)
 [![Coverage](https://codecov.io/gh/yourusername/supabase-mcp-server/branch/main/graph/badge.svg)](https://codecov.io/gh/yourusername/supabase-mcp-server)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
@@ -96,7 +96,7 @@ npm install -g supabase-mcp-server
 
 ```bash
 # 1. Clone and configure
-git clone https://github.com/yourusername/supabase-mcp-server.git
+git clone https://github.com/q23/supabase-mcp-server.git
 cd supabase-mcp-server
 cp .env.example .env
 
@@ -142,7 +142,7 @@ See [Client Configuration Guide](./docs/CLIENT-CONFIGURATION.md)
 ### Option 3: Development
 
 ```bash
-git clone https://github.com/yourusername/supabase-mcp-server.git
+git clone https://github.com/q23/supabase-mcp-server.git
 cd supabase-mcp-server
 npm install
 
@@ -210,7 +210,7 @@ npm run dev
 ### Setup
 
 ```bash
-git clone https://github.com/yourusername/supabase-mcp-server.git
+git clone https://github.com/q23/supabase-mcp-server.git
 cd supabase-mcp-server
 npm install
 ```
@@ -288,9 +288,9 @@ MIT License - see [LICENSE](./LICENSE) file for details
 
 ## Support
 
-- GitHub Issues: [Report a bug](https://github.com/yourusername/supabase-mcp-server/issues)
+- GitHub Issues: [Report a bug](https://github.com/q23/supabase-mcp-server/issues)
 - Documentation: [Read the docs](./docs)
-- Discussions: [Ask questions](https://github.com/yourusername/supabase-mcp-server/discussions)
+- Discussions: [Ask questions](https://github.com/q23/supabase-mcp-server/discussions)
 
 ## Roadmap
 
@@ -308,4 +308,4 @@ See [tasks.md](./.specify/specs/001-supabase-mcp-server/tasks.md) for detailed t
 
 ---
 
-Built with ❤️ following the [Supabase MCP Constitution](https://github.com/yourusername/supabase-mcp-server/blob/main/.specify/memory/constitution.md)
+Built with ❤️ following the [Supabase MCP Constitution](https://github.com/q23/supabase-mcp-server/blob/main/.specify/memory/constitution.md)

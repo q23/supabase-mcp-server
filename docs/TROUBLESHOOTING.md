@@ -44,5 +44,5 @@
 
 ## Support
 
-- GitHub Issues: [Report a bug](https://github.com/yourusername/supabase-mcp-server/issues)
-- Documentation: [Read the docs](https://github.com/yourusername/supabase-mcp-server/docs)
+- GitHub Issues: [Report a bug](https://github.com/q23/supabase-mcp-server/issues)
+- Documentation: [Read the docs](https://github.com/q23/supabase-mcp-server/docs)
