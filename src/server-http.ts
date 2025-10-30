@@ -230,8 +230,8 @@ class SupabaseMCPServer {
       });
     });
 
-    const server = app.listen(MCP_PORT, () => {
-      console.log(`${SERVER_NAME} v${SERVER_VERSION} listening on http://localhost:${MCP_PORT}`);
+    const server = app.listen(MCP_PORT, '0.0.0.0', () => {
+      console.log(`${SERVER_NAME} v${SERVER_VERSION} listening on http://0.0.0.0:${MCP_PORT}`);
       console.log(`Authentication: ${API_KEY ? "Enabled (Bearer token)" : "Disabled"}`);
       console.log(`Endpoints:`);
       console.log(`  POST   /mcp    - MCP requests`);
