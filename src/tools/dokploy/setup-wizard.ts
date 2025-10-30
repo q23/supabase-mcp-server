@@ -183,9 +183,18 @@ export class SetupWizard {
         description: `Supabase instance: ${this.input.projectName}`,
       });
 
-      // Extract projectId and environmentId from response
-      this.input.projectId = projectResponse.project.projectId;
-      this.input.environmentId = projectResponse.environment.environmentId;
+      // Extract projectId from response (API returns it directly, not nested)
+      logger.debug("Project create response:", projectResponse);
+
+      // Validate response structure
+      if (!projectResponse?.projectId) {
+        throw new Error(`Project creation failed: Missing projectId in response. Got: ${JSON.stringify(projectResponse)}`);
+      }
+
+      this.input.projectId = projectResponse.projectId;
+
+      // Note: Dokploy API doesn't return environmentId in project.create
+      // We'll need to fetch it separately or use the project's default environment
 
       logger.info("Project created", {
         projectId: this.input.projectId,
