@@ -201,8 +201,9 @@ export class DokployAPIClient {
           updateCount: updates.length,
         });
 
-        await this.request("PUT", `/api/application/${applicationId}/env`, {
-          variables: updates,
+        await this.request("POST", "/api/application.saveEnvironment", {
+          applicationId,
+          environmentVariables: updates,
         });
 
         logger.info("Environment variables updated", { applicationId });
@@ -229,11 +230,11 @@ export class DokployAPIClient {
 
         const response = await this.request<DeploymentResponse>(
           "POST",
-          `/api/application/${applicationId}/deploy`,
+          "/api/application.deploy",
           {
-            rebuild: options?.rebuild || false,
-            restart: options?.restart || true,
-            envUpdates: options?.envUpdates,
+            applicationId,
+            titleLog: "MCP Server deployment",
+            descriptionLog: options?.envUpdates ? "Deployment with env updates" : "Standard deployment",
           }
         );
 
@@ -263,7 +264,7 @@ export class DokployAPIClient {
     try {
       const response = await this.request<HealthCheckResponse>(
         "GET",
-        `/api/application/${applicationId}/health`
+        `/api/application.readAppMonitoring?applicationId=${applicationId}`
       );
 
       return response;
@@ -279,7 +280,7 @@ export class DokployAPIClient {
     try {
       const response = await this.request<DokployApplication>(
         "GET",
-        `/api/application/${applicationId}`
+        `/api/application.one?applicationId=${applicationId}`
       );
 
       return response;
@@ -336,7 +337,13 @@ export class DokployAPIClient {
       async () => {
         logger.info("Restarting application", { applicationId });
 
-        await this.request("POST", `/api/application/${applicationId}/restart`, {});
+        await this.request("POST", "/api/application.stop", {
+          applicationId,
+        });
+
+        await this.request("POST", "/api/application.start", {
+          applicationId,
+        });
 
         logger.info("Application restarted", { applicationId });
       },
