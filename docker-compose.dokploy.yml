@@ -59,6 +59,10 @@ services:
         max-size: "10m"
         max-file: "3"
 
+    # Connect to Dokploy's Traefik network
+    networks:
+      - dokploy-network
+
     labels:
       - "service=mcp-server"
       - "environment=production"
@@ -71,3 +75,9 @@ services:
       timeout: 5s
       retries: 3
       start_period: 15s
+
+# Use Dokploy's existing Traefik network
+networks:
+  dokploy-network:
+    external: true
+    name: dokploy-network
