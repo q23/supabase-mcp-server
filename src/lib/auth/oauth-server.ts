@@ -132,6 +132,26 @@ export class OAuthServer {
       throw new Error("Invalid client credentials");
     }
 
+    // Grant Type: client_credentials (for MCP initialize)
+    if (params.grantType === "client_credentials") {
+      const accessToken = jwt.sign(
+        {
+          clientId: params.clientId,
+          grant_type: "client_credentials",
+          iat: Math.floor(Date.now() / 1000),
+          exp: Math.floor(Date.now() / 1000) + this.config.tokenExpiry,
+        },
+        this.config.jwtSecret
+      );
+
+      return {
+        accessToken,
+        tokenType: "Bearer",
+        expiresIn: this.config.tokenExpiry,
+      };
+    }
+
+    // Grant Type: authorization_code (for MCP tool calls)
     if (params.grantType === "authorization_code") {
       if (!params.code) {
         throw new Error("Missing authorization code");
