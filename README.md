@@ -1,6 +1,6 @@
 # Supabase MCP Server
 
-**Production-ready MCP server providing comprehensive Supabase management capabilities for both cloud and self-hosted instances.**
+MCP server providing comprehensive Supabase management capabilities for both cloud and self-hosted instances.
 
 [![CI](https://github.com/q23/supabase-mcp-server/workflows/CI/badge.svg)](https://github.com/q23/supabase-mcp-server/actions)
 [![Coverage](https://codecov.io/gh/yourusername/supabase-mcp-server/branch/main/graph/badge.svg)](https://codecov.io/gh/yourusername/supabase-mcp-server)
@@ -8,46 +8,46 @@
 
 ## Features
 
-### 🚀 Zero-Touch Dokploy Deployment (P1)
-- Deploy production-ready Supabase to Dokploy in under 10 minutes
+### Automated Dokploy Deployment (P1)
+- Deploy Supabase to Dokploy in under 10 minutes
 - Automatic JWT key generation with correct claims (`role`, `iss`)
 - Automatic HTTP→HTTPS conversion for public URLs
 - Post-deployment validation (auth endpoint, container health)
 
-### 🔧 Broken Config Detection & Repair (P1)
+### Broken Config Detection & Repair (P1)
 - Detect broken Dokploy-generated JWT keys
 - Automatic key regeneration with correct structure
 - Environment variable updates via Dokploy API
 - Container restart automation
 
-### 🔌 Self-Hosted Connection Management (P1)
+### Self-Hosted Connection Management (P1)
 - Handles all 6 connection string formats
 - Docker network auto-detection
 - Connection pool monitoring and alerts
 - Correct role-based query execution (auth schema access)
 - CLI bypass for migrations (direct PostgreSQL)
 
-### 🔄 Cross-Instance Database Migration (P2)
+### Cross-Instance Database Migration (P2)
 - Migrate schema and data between any Supabase instances
 - Chunked transfer for large datasets (512KB memory buffer)
 - 100% data integrity verification (checksums, row counts)
 - Progress streaming and resumable operations
 
-### 💾 Production-Ready Backups (P2)
+### Automated Backups (P2)
 - Automated encrypted backups (AES-256)
 - Compression support (gzip/zstd)
 - S3-compatible storage integration
 - Point-in-time recovery
 - Configurable retention policies
 
-### 📊 Real-Time Monitoring & Alerts (P2)
+### Real-Time Monitoring & Alerts (P2)
 - Container health monitoring
 - Connection pool status tracking
 - SSL certificate expiration detection
 - Log aggregation from all services
 - In-MCP notifications + optional webhooks
 
-### 🎯 Multi-Instance Orchestration (P3)
+### Multi-Instance Orchestration (P3)
 - Manage dev/staging/production from one interface
 - Schema sync between instances
 - Safe deployment promotion workflow
@@ -84,15 +84,14 @@ npm install -g supabase-mcp-server
 }
 ```
 
-### Option 2: Remote Deployment (Claude Code, Teams) 🚀
+### Option 2: Remote Deployment (Claude Code, Teams)
 
 **Recommended for:**
 - Multi-user teams
 - Claude Code integration
 - Shared infrastructure management
-- **Production-ready with auto-start & auto-restart**
 
-#### Quick Deploy (Auto-Start + Never Down)
+#### Quick Deploy
 
 ```bash
 # 1. Clone and configure
@@ -108,10 +107,10 @@ nano .env  # Add: MCP_API_KEY=<key>, DOKPLOY_API_URL, etc.
 chmod +x deployment/deploy.sh
 ./deployment/deploy.sh
 
-# ✅ Server auto-starts on boot
-# ✅ Auto-restarts on crash
-# ✅ Health checks every 30s
-# ✅ Zero downtime updates
+# Server auto-starts on boot
+# Auto-restarts on crash
+# Health checks every 30s
+# Zero downtime updates
 ```
 
 **Deployment Methods:**
@@ -270,13 +269,13 @@ src/
 └── types/         # TypeScript type definitions
 ```
 
-## Key Differentiators
+## Key Features
 
-✅ **Dokploy Integration**: Only MCP server with native Dokploy support (99% of self-hosted deployments)
-✅ **Zero Configuration**: Automated deployment with broken config detection
-✅ **Production Ready**: Encryption, backups, monitoring, audit logs
-✅ **Memory Efficient**: 512KB buffer with automatic disk spillover
-✅ **100% Data Integrity**: Verified migrations and backups
+- **Dokploy Integration**: Native Dokploy support for self-hosted deployments
+- **Automated Configuration**: Deployment with broken config detection
+- **Security**: Encryption, backups, monitoring, audit logs
+- **Memory Management**: 512KB buffer with automatic disk spillover
+- **Data Integrity**: Verified migrations and backups
 
 ## Contributing
 

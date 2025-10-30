@@ -1,7 +1,7 @@
 {
   "name": "supabase-mcp-server",
   "version": "0.1.0",
-  "description": "Production-ready MCP server providing comprehensive Supabase management capabilities for both cloud and self-hosted instances",
+  "description": "MCP server providing comprehensive Supabase management capabilities for cloud and self-hosted instances",
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
