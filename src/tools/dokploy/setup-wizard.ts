@@ -184,8 +184,20 @@ export class SetupWizard {
       });
 
       // Extract projectId and environmentId from response
+      logger.debug("Project create response:", projectResponse);
+
+      // Validate response structure
+      if (!projectResponse?.project?.projectId) {
+        throw new Error(`Project creation failed: Missing projectId in response. Got: ${JSON.stringify(projectResponse)}`);
+      }
+
       this.input.projectId = projectResponse.project.projectId;
-      this.input.environmentId = projectResponse.environment.environmentId;
+      this.input.environmentId = projectResponse.environment?.environmentId;
+
+      // Environment might not always be in response
+      if (!this.input.environmentId) {
+        logger.warn("No environmentId in project.create response, will fetch later");
+      }
 
       logger.info("Project created", {
         projectId: this.input.projectId,
