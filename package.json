@@ -23,8 +23,7 @@
     "format": "biome format --write .",
     "format:check": "biome format .",
     "typecheck": "tsc --noEmit",
-    "clean": "rm -rf dist coverage .vitest",
-    "prepare": "npm run build"
+    "clean": "rm -rf dist coverage .vitest"
   },
   "keywords": [
     "supabase",
