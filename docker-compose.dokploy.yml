@@ -62,12 +62,7 @@ services:
     labels:
       - "service=mcp-server"
       - "environment=production"
-      # Traefik labels for Dokploy routing
-      - "traefik.enable=true"
-      - "traefik.http.routers.supabase-mcp-nkcyus-mcp-server.rule=Host(`mcp-server.dokploy.dev.q23.de`)"
-      - "traefik.http.routers.supabase-mcp-nkcyus-mcp-server.tls=true"
-      - "traefik.http.routers.supabase-mcp-nkcyus-mcp-server.tls.certresolver=letsencrypt"
-      - "traefik.http.services.supabase-mcp-nkcyus-mcp-server.loadbalancer.server.port=3000"
+      # Let Dokploy generate Traefik labels automatically via Domain UI config
 
     # Health check
     healthcheck:
