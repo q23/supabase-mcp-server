@@ -73,7 +73,9 @@ export class OAuthServer {
     codeChallenge?: string;
     codeChallengeMethod?: string;
   }): { code: string; redirectUri: string } {
-    if (params.clientId !== this.config.clientId) {
+    // Validate client ID (check dynamic clients, including default)
+    const client = this.dynamicClients.get(params.clientId);
+    if (!client) {
       throw new Error("Invalid client_id");
     }
 
