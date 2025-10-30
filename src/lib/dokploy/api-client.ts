@@ -160,12 +160,16 @@ export class DokployAPIClient {
           domain: config.domain,
         });
 
+        // First, get or create a project
+        const projectId = config.projectId || await this.getDefaultProjectId();
+
         const response = await this.request<DokployApplication>("POST", "/api/application.create", {
           name: config.projectName,
           appName: config.projectName,
           description: "Supabase instance deployed via MCP",
-          projectId: config.projectId || "default",
+          projectId,
           serverId: null,
+          environmentId: "production", // Default environment
         });
 
         logger.info("Dokploy application created", {
@@ -411,6 +415,22 @@ export class DokployAPIClient {
         context: { deploymentId, timeoutMs },
       }
     );
+  }
+
+  /**
+   * Get default project ID
+   */
+  private async getDefaultProjectId(): Promise<string> {
+    try {
+      // Try to get first project
+      const response = await this.request<any>("GET", "/api/project.all");
+      if (response && response.length > 0) {
+        return response[0].projectId;
+      }
+    } catch {
+      // Ignore error, will use fallback
+    }
+    return "default-project";
   }
 
   /**
