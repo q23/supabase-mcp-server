@@ -60,6 +60,12 @@ services:
     labels:
       - "service=mcp-server"
       - "environment=production"
+      # Traefik labels for Dokploy routing
+      - "traefik.enable=true"
+      - "traefik.http.routers.supabase-mcp-nkcyus-mcp-server.rule=Host(`mcp-server.dokploy.dev.q23.de`)"
+      - "traefik.http.routers.supabase-mcp-nkcyus-mcp-server.tls=true"
+      - "traefik.http.routers.supabase-mcp-nkcyus-mcp-server.tls.certresolver=letsencrypt"
+      - "traefik.http.services.supabase-mcp-nkcyus-mcp-server.loadbalancer.server.port=3000"
 
     # Health check
     healthcheck:
@@ -68,10 +74,3 @@ services:
       timeout: 5s
       retries: 3
       start_period: 15s
-
-    # Traefik labels for automatic routing (optional - Dokploy UI is easier)
-    # labels:
-    #   - "traefik.enable=true"
-    #   - "traefik.http.routers.mcp.rule=Host(`mcp.dev.q23.de`)"
-    #   - "traefik.http.routers.mcp.tls=true"
-    #   - "traefik.http.services.mcp.loadbalancer.server.port=3000"
