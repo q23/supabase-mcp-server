@@ -220,6 +220,14 @@ class SupabaseMCPServer {
           const codeChallenge = req.query["code_challenge"] as string;
           const codeChallengeMethod = req.query["code_challenge_method"] as string;
 
+          // DEBUG: Log incoming request
+          console.log("[OAuth] Authorize request:", {
+            clientId,
+            redirectUri,
+            state,
+            codeChallenge: codeChallenge ? "present" : "none",
+          });
+
           if (!clientId || !redirectUri) {
             res.status(400).json({ error: "Missing required parameters" });
             return;
@@ -243,6 +251,13 @@ class SupabaseMCPServer {
       // Token endpoint
       app.post("/oauth/token", (req, res) => {
         try {
+          // DEBUG: Log token request
+          console.log("[OAuth] Token request:", {
+            grantType: req.body.grant_type,
+            clientId: req.body.client_id,
+            code: req.body.code ? "present" : "none",
+          });
+
           const result = this.oauthServer!.token({
             grantType: req.body.grant_type,
             code: req.body.code,

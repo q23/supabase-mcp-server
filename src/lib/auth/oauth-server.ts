@@ -76,6 +76,9 @@ export class OAuthServer {
     // Validate client ID (check dynamic clients, including default)
     const client = this.dynamicClients.get(params.clientId);
     if (!client) {
+      // DEBUG: Log registered clients
+      console.error("[OAuth] Invalid client_id:", params.clientId);
+      console.error("[OAuth] Registered clients:", Array.from(this.dynamicClients.keys()));
       throw new Error("Invalid client_id");
     }
 
