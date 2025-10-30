@@ -11,13 +11,20 @@ import { DokployAPIClient } from "./lib/dokploy/api-client.js";
 import { SetupWizard } from "./tools/dokploy/setup-wizard.js";
 import { ConfigValidator } from "./tools/dokploy/validate-config.js";
 import { RegenerateKeysTool } from "./tools/dokploy/regenerate-keys.js";
+import { OAuthServer } from "./lib/auth/oauth-server.js";
 
 config();
 
 const SERVER_NAME = "supabase-mcp-server";
 const SERVER_VERSION = "0.1.0";
 const MCP_PORT = parseInt(process.env["MCP_PORT"] || "3000");
-const API_KEY = process.env["MCP_API_KEY"]; // Simple API key auth
+
+// OAuth or API Key authentication
+const OAUTH_ENABLED = process.env["OAUTH_ENABLED"] === "true";
+const OAUTH_CLIENT_ID = process.env["OAUTH_CLIENT_ID"] || "";
+const OAUTH_CLIENT_SECRET = process.env["OAUTH_CLIENT_SECRET"] || "";
+const OAUTH_JWT_SECRET = process.env["OAUTH_JWT_SECRET"] || "";
+const API_KEY = process.env["MCP_API_KEY"]; // Fallback to simple API key
 
 interface TransportMap {
   [sessionId: string]: StreamableHTTPServerTransport;
@@ -26,6 +33,7 @@ interface TransportMap {
 class SupabaseMCPServer {
   private server: Server;
   private transports: TransportMap = {};
+  private oauthServer?: OAuthServer;
 
   constructor() {
     this.server = new Server(
@@ -33,6 +41,19 @@ class SupabaseMCPServer {
       { capabilities: { tools: {} } }
     );
     this.setupHandlers();
+
+    // Initialize OAuth if enabled
+    if (OAUTH_ENABLED && OAUTH_CLIENT_ID && OAUTH_CLIENT_SECRET && OAUTH_JWT_SECRET) {
+      this.oauthServer = new OAuthServer({
+        clientId: OAUTH_CLIENT_ID,
+        clientSecret: OAUTH_CLIENT_SECRET,
+        jwtSecret: OAUTH_JWT_SECRET,
+        tokenExpiry: 3600, // 1 hour
+      });
+
+      // Cleanup expired codes every 5 minutes
+      setInterval(() => this.oauthServer?.cleanupExpiredCodes(), 5 * 60 * 1000);
+    }
   }
 
   private setupHandlers(): void {
@@ -144,20 +165,91 @@ class SupabaseMCPServer {
     const app = express();
     app.use(express.json());
 
-    // Health endpoint (NO AUTH REQUIRED - must be before auth middleware!)
+    // Public endpoints (NO AUTH REQUIRED - must be before auth middleware!)
+
     app.get("/health", (_req, res) => {
       res.json({
         status: "healthy",
         server: SERVER_NAME,
         version: SERVER_VERSION,
         sessions: Object.keys(this.transports).length,
+        auth: OAUTH_ENABLED ? "oauth" : (API_KEY ? "api-key" : "none"),
       });
     });
 
-    // Simple API Key authentication middleware
+    // OAuth endpoints (NO AUTH - public for OAuth flow)
+    if (this.oauthServer) {
+      // OAuth metadata endpoint
+      app.get("/.well-known/oauth-authorization-server", (_req, res) => {
+        const baseUrl = `https://${_req.get('host') || 'localhost'}`;
+        res.json({
+          issuer: baseUrl,
+          authorization_endpoint: `${baseUrl}/oauth/authorize`,
+          token_endpoint: `${baseUrl}/oauth/token`,
+          response_types_supported: ["code"],
+          grant_types_supported: ["authorization_code"],
+          token_endpoint_auth_methods_supported: ["client_secret_post"],
+          code_challenge_methods_supported: ["S256", "plain"],
+        });
+      });
+
+      // Authorization endpoint
+      app.get("/oauth/authorize", (req, res) => {
+        try {
+          const clientId = req.query["client_id"] as string;
+          const redirectUri = req.query["redirect_uri"] as string;
+          const state = req.query["state"] as string;
+          const codeChallenge = req.query["code_challenge"] as string;
+          const codeChallengeMethod = req.query["code_challenge_method"] as string;
+
+          if (!clientId || !redirectUri) {
+            res.status(400).json({ error: "Missing required parameters" });
+            return;
+          }
+
+          const result = this.oauthServer!.authorize({
+            clientId,
+            redirectUri,
+            state,
+            codeChallenge,
+            codeChallengeMethod,
+          });
+
+          // Redirect back to client with authorization code
+          res.redirect(result.redirectUri);
+        } catch (err: any) {
+          res.status(400).json({ error: err.message });
+        }
+      });
+
+      // Token endpoint
+      app.post("/oauth/token", (req, res) => {
+        try {
+          const result = this.oauthServer!.token({
+            grantType: req.body.grant_type,
+            code: req.body.code,
+            clientId: req.body.client_id,
+            clientSecret: req.body.client_secret,
+            redirectUri: req.body.redirect_uri,
+            codeVerifier: req.body.code_verifier,
+          });
+
+          res.json({
+            access_token: result.accessToken,
+            token_type: result.tokenType,
+            expires_in: result.expiresIn,
+          });
+        } catch (err: any) {
+          res.status(400).json({ error: err.message });
+        }
+      });
+    }
+
+    // Authentication middleware (OAuth or API Key)
     const authMiddleware = (req: express.Request, res: express.Response, next: express.NextFunction) => {
-      if (!API_KEY) {
-        return next(); // No auth if API_KEY not set
+      // Skip auth if neither OAuth nor API key is configured
+      if (!OAUTH_ENABLED && !API_KEY) {
+        return next();
       }
 
       const authHeader = req.headers.authorization;
@@ -166,11 +258,21 @@ class SupabaseMCPServer {
       }
 
       const token = authHeader.substring(7);
-      if (token !== API_KEY) {
-        return res.status(403).json({ error: "Invalid API key" });
+
+      // OAuth token validation
+      if (OAUTH_ENABLED && this.oauthServer) {
+        if (this.oauthServer.validateToken(token)) {
+          return next();
+        }
+        return res.status(403).json({ error: "Invalid OAuth token" });
       }
 
-      next();
+      // Fallback to API key validation
+      if (API_KEY && token === API_KEY) {
+        return next();
+      }
+
+      return res.status(403).json({ error: "Invalid credentials" });
     };
 
     // Apply auth to all routes EXCEPT /health (which is already defined above)
