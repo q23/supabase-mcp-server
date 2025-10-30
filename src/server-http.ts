@@ -144,6 +144,16 @@ class SupabaseMCPServer {
     const app = express();
     app.use(express.json());
 
+    // Health endpoint (NO AUTH REQUIRED - must be before auth middleware!)
+    app.get("/health", (_req, res) => {
+      res.json({
+        status: "healthy",
+        server: SERVER_NAME,
+        version: SERVER_VERSION,
+        sessions: Object.keys(this.transports).length,
+      });
+    });
+
     // Simple API Key authentication middleware
     const authMiddleware = (req: express.Request, res: express.Response, next: express.NextFunction) => {
       if (!API_KEY) {
@@ -163,6 +173,7 @@ class SupabaseMCPServer {
       next();
     };
 
+    // Apply auth to all routes EXCEPT /health (which is already defined above)
     app.use(authMiddleware);
 
     // POST /mcp - Handle MCP requests
@@ -220,15 +231,7 @@ class SupabaseMCPServer {
       res.status(204).send();
     });
 
-    // Health endpoint (no auth required)
-    app.get("/health", (_req, res) => {
-      res.json({
-        status: "healthy",
-        server: SERVER_NAME,
-        version: SERVER_VERSION,
-        sessions: Object.keys(this.transports).length,
-      });
-    });
+    // Health endpoint was moved before auth middleware (line 148)
 
     const server = app.listen(MCP_PORT, '0.0.0.0', () => {
       console.log(`${SERVER_NAME} v${SERVER_VERSION} listening on http://0.0.0.0:${MCP_PORT}`);
